@@ -27,9 +27,9 @@ class Dolphin:
                 "(You should only see this warning once)"
             )
 
-        # Copy over Locations.txt
-        # TODO Make this configurable
-        shutil.copy("melee/Locations.txt", mem_watcher_path)
+        # Copy over Locations.txt that is adjacent to this file
+        path = os.path.dirname(os.path.realpath(__file__))
+        shutil.copy(path + "/Locations.txt", mem_watcher_path)
 
         # Create the Pipes directory if it doesn't already exist
         if not os.path.exists(pipes_path):
