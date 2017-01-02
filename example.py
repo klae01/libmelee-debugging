@@ -4,7 +4,6 @@ import signal
 import sys
 
 import melee
-from chains import choosecharacter, multishine, skippostgame
 
 # This example program demonstrates how to use the Melee API to run dolphin programatically,
 #   setup controllers, and send button presses over to dolphin
@@ -76,15 +75,6 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-
-def createchain(new_chain):
-    global chain
-    if chain == None:
-        chain = new_chain(gamestate=gamestate, controller=controller)
-    if type(chain) != new_chain:
-        chain = new_chain(gamestate=gamestate, controller=controller)
-
-
 # Run dolphin and render the output
 dolphin.run(render=True)
 # Plug our controller in
@@ -100,18 +90,21 @@ for mem_update in gamestate:
             # XXX: This is where your AI does all of its stuff!
             # This line will get hit once per frame, so here is where you read
             #   in the gamestate and decide what buttons to push on the controller
-            createchain(multishine.MultiShine)
-            chain.pressbuttons()
+            melee.techskill.multishine(
+                ai_state=gamestate.ai_state, controller=controller
+            )
         # If we're at the character select screen, choose Fox
         elif gamestate.menu_state == melee.enums.Menu.CHARACTER_SELECT:
-            createchain(choosecharacter.ChooseCharacter)
-            chain.pressbuttons()
+            melee.menuhelper.choosecharacter(
+                character=melee.enums.Character.FOX,
+                ai_state=gamestate.ai_state,
+                controller=controller,
+            )
         # If we're at the postgame scores screen, spam START
         elif gamestate.menu_state == melee.enums.Menu.POSTGAME_SCORES:
-            createchain(skippostgame.SkipPostgame)
-            chain.pressbuttons()
+            melee.menuhelper.skippostgame(controller=controller)
         # Flush any button presses queued up
         controller.flush()
         if log:
-            log.logframe()
+            log.logframe(gamestate)
             log.writeframe()

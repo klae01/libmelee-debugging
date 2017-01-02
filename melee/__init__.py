@@ -4,6 +4,7 @@ Currently only works on Linux/OSX
 """
 
 import melee.version
+from melee import menuhelper, techskill
 from melee.controller import Controller, ControllerState
 from melee.dolphin import Dolphin
 from melee.enums import Action, Button, Character, Menu, ProjectileSubtype, Stage
