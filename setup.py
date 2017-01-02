@@ -13,4 +13,5 @@ setup(
     classifiers=[],
     license="GPLv3",
     platform="linux, osx",
+    include_package_data=True,
 )
