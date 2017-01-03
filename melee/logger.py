@@ -13,10 +13,6 @@ class Logger:
         self.csvfile = open("Logs/" + str(timestamp) + ".csv", "w")
         fieldnames = [
             "Frame",
-            "Goal",
-            "Strategy",
-            "Tactic",
-            "Chain",
             "Opponent x",
             "Opponent y",
             "AI x",
