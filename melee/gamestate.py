@@ -4,7 +4,7 @@ import os
 import socket
 from struct import *
 
-from melee import enums
+from melee import characterstats, enums
 
 """Represents the state of a running game of Melee at a given moment in time"""
 
@@ -149,6 +149,9 @@ class GameState:
         if label == "jumps_left":
             temp = unpack(">I", mem_update[1])[0]
             temp = temp >> 24
+            # This value is actually the number of jumps USED
+            #   so we have to do some quick math to turn this into what we want
+            temp = characterstats.maxjumps(self.player[player_int].character) - temp + 1
             self.player[player_int].jumps_left = temp
             return False
         if label == "on_ground":

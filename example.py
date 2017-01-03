@@ -93,7 +93,7 @@ for mem_update in gamestate:
             melee.techskill.multishine(
                 ai_state=gamestate.ai_state, controller=controller
             )
-        # If we're at the character select screen, choose Fox
+        # If we're at the character select screen, choose our character
         elif gamestate.menu_state == melee.enums.Menu.CHARACTER_SELECT:
             melee.menuhelper.choosecharacter(
                 character=melee.enums.Character.FOX,
