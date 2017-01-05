@@ -99,6 +99,7 @@ for mem_update in gamestate:
                 character=melee.enums.Character.FOX,
                 ai_state=gamestate.ai_state,
                 controller=controller,
+                swag=True,
             )
         # If we're at the postgame scores screen, spam START
         elif gamestate.menu_state == melee.enums.Menu.POSTGAME_SCORES:
