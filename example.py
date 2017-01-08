@@ -97,9 +97,10 @@ for mem_update in gamestate:
         elif gamestate.menu_state == melee.enums.Menu.CHARACTER_SELECT:
             melee.menuhelper.choosecharacter(
                 character=melee.enums.Character.FOX,
-                ai_state=gamestate.ai_state,
+                gamestate=gamestate,
                 controller=controller,
                 swag=True,
+                start=True,
             )
         # If we're at the postgame scores screen, spam START
         elif gamestate.menu_state == melee.enums.Menu.POSTGAME_SCORES:
