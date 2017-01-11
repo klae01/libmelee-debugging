@@ -1,10 +1,11 @@
 import binascii
 import csv
+import math
 import os
 import socket
 from struct import *
 
-from melee import characterstats, enums
+from melee import characterstats, enums, stages
 
 """Represents the state of a running game of Melee at a given moment in time"""
 
@@ -18,6 +19,7 @@ class GameState:
     stage_select_cursor_x = 0.0
     stage_select_cursor_y = 0.0
     ready_to_start = False
+    distance = 0.0
 
     def __init__(self, dolphin):
         # Dict with key of address, and value of (name, player)
@@ -70,10 +72,24 @@ class GameState:
         if label == "frame":
             self.frame = unpack("<I", mem_update[1])[0]
             self.newframe = True
+            # Now that the frame is ready, let's calculate some derived information
+            #   These are not stored inside Melee anywhere, but are nonetheless
+            #   important pieces of information that we don't want to make the
+            #   user have to re-calculate on their own
+            for i in self.player:
+                if abs(self.player[i].x) > stages.edgegroundposition(self.stage):
+                    self.player[i].off_stage = True
+                else:
+                    self.player[i].off_stage = False
+            # TODO: This needs updating in order to support >2 players
+            xdist = self.ai_state.x - self.opponent_state.x
+            ydist = self.ai_state.y - self.opponent_state.y
+            self.distance = math.sqrt((xdist**2) + (ydist**2))
             return True
         if label == "stage":
             self.stage = unpack("<I", mem_update[1])[0]
             self.stage = self.stage >> 16
+            self.stage &= 0x000000FF
             try:
                 self.stage = enums.Stage(self.stage)
             except ValueError:
@@ -287,6 +303,7 @@ class PlayerState:
     cursor_y = 0
     coin_down = False
     controller_status = enums.ControllerStatus.CONTROLLER_UNPLUGGED
+    off_stage = False
 
     """Produces a list representation of the player's state"""
 
