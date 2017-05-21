@@ -3,9 +3,10 @@ import csv
 import math
 import os
 import socket
+from collections import defaultdict
 from struct import *
 
-from melee import characterstats, enums, stages
+from melee import characterdata, enums, stages
 
 """Represents the state of a running game of Melee at a given moment in time"""
 
@@ -20,16 +21,17 @@ class GameState:
     stage_select_cursor_y = 0.0
     ready_to_start = False
     distance = 0.0
+    sock = None
 
     def __init__(self, dolphin):
         # Dict with key of address, and value of (name, player)
         self.locations = dict()
-        # Copy the locations.csv adjacent to this file
         path = os.path.dirname(os.path.realpath(__file__))
         with open(path + "/locations.csv") as csvfile:
             reader = csv.DictReader(csvfile)
             for line in reader:
                 self.locations[line["Address"]] = (line["Name"], line["Player"])
+        self.characterdata = characterdata.CharacterData()
         self.player[1] = PlayerState()
         self.player[2] = PlayerState()
         self.player[3] = PlayerState()
@@ -38,7 +40,15 @@ class GameState:
         # Helper names to keep track of us and our opponent
         self.ai_state = self.player[dolphin.ai_port]
         self.opponent_state = self.player[dolphin.opponent_port]
-
+        # Read in the action data csv
+        with open(path + "/actiondata.csv") as csvfile:
+            # A list of dicts containing the frame data
+            actiondata = list(csv.DictReader(csvfile))
+            # Dict of sets
+            self.zero_indices = defaultdict(set)
+            for line in actiondata:
+                if line["zeroindex"] == "True":
+                    self.zero_indices[line["character"]].add(line["action"])
         # Creates the socket if it does not exist, and then opens it.
         path = dolphin.get_memory_watcher_socket_path()
         try:
@@ -69,6 +79,13 @@ class GameState:
             if self.update(mem_update):
                 return
 
+    # Melee's indexing of action frames is wildly inconsistent.
+    #   Here we adjust all of the frames to be indexed at 1 (so math is easier)
+    def fixframeindexing(self):
+        for index, player in self.player.items():
+            if str(player.action) in self.zero_indices[str(player.character)]:
+                player.action_frame = player.action_frame + 1
+
     """Process one new memory update
        returns True if the frame is finished processing (no more updates this frame)
        Run this in a loop until it returns returns True, then press your buttons,
@@ -93,6 +110,7 @@ class GameState:
             xdist = self.ai_state.x - self.opponent_state.x
             ydist = self.ai_state.y - self.opponent_state.y
             self.distance = math.sqrt((xdist**2) + (ydist**2))
+            self.fixframeindexing()
             return True
         if label == "stage":
             self.stage = unpack("<I", mem_update[1])[0]
@@ -192,7 +210,7 @@ class GameState:
             temp = temp >> 24
             # This value is actually the number of jumps USED
             #   so we have to do some quick math to turn this into what we want
-            temp = characterstats.maxjumps(self.player[player_int].character) - temp + 1
+            # TODO = characterstats.maxjumps(self.player[player_int].character) - temp + 1
             self.player[player_int].jumps_left = temp
             return False
         if label == "on_ground":
@@ -221,6 +239,7 @@ class GameState:
             temp = unpack("<I", mem_update[1])[0]
             temp = temp & 0x000000FF
             self.player[player_int].coin_down = temp == 2
+            return False
         if label == "stage_select_cursor_x":
             self.stage_select_cursor_x = unpack("<f", mem_update[1])[0]
             return False
@@ -231,10 +250,76 @@ class GameState:
             temp = unpack(">I", mem_update[1])[0]
             temp = temp & 0x000000FF
             self.ready_to_start = not bool(temp)
+            return False
         if label == "controller_status":
             temp = unpack(">I", mem_update[1])[0]
             temp = temp & 0x000000FF
             self.player[player_int].controller_status = enums.ControllerStatus(temp)
+            return False
+        if label == "hitbox_1_size":
+            self.player[player_int].hitbox_1_size = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_2_size":
+            self.player[player_int].hitbox_2_size = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_3_size":
+            self.player[player_int].hitbox_3_size = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_4_size":
+            self.player[player_int].hitbox_4_size = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_1_status":
+            temp = unpack("<I", mem_update[1])[0]
+            status = True
+            if temp == 0:
+                status = False
+            self.player[player_int].hitbox_1_status = status
+            return False
+        if label == "hitbox_2_status":
+            temp = unpack("<I", mem_update[1])[0]
+            status = True
+            if temp == 0:
+                status = False
+            self.player[player_int].hitbox_2_status = status
+            return False
+        if label == "hitbox_3_status":
+            temp = unpack("<I", mem_update[1])[0]
+            status = True
+            if temp == 0:
+                status = False
+            self.player[player_int].hitbox_3_status = status
+            return False
+        if label == "hitbox_4_status":
+            temp = unpack("<I", mem_update[1])[0]
+            status = True
+            if temp == 0:
+                status = False
+            self.player[player_int].hitbox_4_status = status
+            return False
+        if label == "hitbox_1_x":
+            self.player[player_int].hitbox_1_x = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_1_y":
+            self.player[player_int].hitbox_1_y = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_2_x":
+            self.player[player_int].hitbox_2_x = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_2_y":
+            self.player[player_int].hitbox_2_y = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_3_x":
+            self.player[player_int].hitbox_3_x = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_3_y":
+            self.player[player_int].hitbox_3_y = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_4_x":
+            self.player[player_int].hitbox_4_x = unpack("<f", mem_update[1])[0]
+            return False
+        if label == "hitbox_4_y":
+            self.player[player_int].hitbox_4_y = unpack("<f", mem_update[1])[0]
+            return False
         if label == "projectiles":
             # Only once per new frame that we get a projectile, clear the list out
             if self.newframe:
@@ -267,7 +352,8 @@ class GameState:
     """Closes the socket."""
 
     def __del__(self):
-        self.sock.close()
+        if self.sock != None:
+            self.sock.close()
 
     """Returns the next (address, value) tuple, or None on timeout.
     address is the string provided by dolphin, set in Locations.txt.
@@ -312,6 +398,22 @@ class PlayerState:
     coin_down = False
     controller_status = enums.ControllerStatus.CONTROLLER_UNPLUGGED
     off_stage = False
+    hitbox_1_size = 0
+    hitbox_2_size = 0
+    hitbox_3_size = 0
+    hitbox_4_size = 0
+    hitbox_1_status = False
+    hitbox_2_status = False
+    hitbox_3_status = False
+    hitbox_4_status = False
+    hitbox_1_x = 0
+    hitbox_1_y = 0
+    hitbox_2_x = 0
+    hitbox_2_y = 0
+    hitbox_3_x = 0
+    hitbox_3_y = 0
+    hitbox_4_x = 0
+    hitbox_4_y = 0
 
     """Produces a list representation of the player's state"""
 

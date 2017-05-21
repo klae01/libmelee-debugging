@@ -46,12 +46,21 @@ parser.add_argument(
     action="store_true",
     help="Debug mode. Creates a CSV of all game state",
 )
+parser.add_argument(
+    "--framerecord",
+    "-r",
+    default=False,
+    action="store_true",
+    help="Records frame data from the match, stores into framedata.csv",
+)
 
 args = parser.parse_args()
 
 log = None
 if args.debug:
     log = melee.logger.Logger()
+
+framedata = melee.framedata.FrameData(args.framerecord != None)
 
 # Options here are:
 #   "Standard" input is what dolphin calls the type of input that we use
@@ -82,6 +91,8 @@ def signal_handler(signal, frame):
         print("")  # because the ^C will be on the terminal
         print("Log file created: " + log.filename)
     print("Shutting down cleanly...")
+    if args.framerecord:
+        framedata.saverecording()
     sys.exit(0)
 
 
@@ -102,6 +113,8 @@ while True:
     gamestate.step()
     # What menu are we in?
     if gamestate.menu_state == melee.enums.Menu.IN_GAME:
+        if args.framerecord:
+            framedata.recordframe(gamestate)
         # XXX: This is where your AI does all of its stuff!
         # This line will get hit once per frame, so here is where you read
         #   in the gamestate and decide what buttons to push on the controller

@@ -4,7 +4,7 @@ Currently only works on Linux/OSX
 """
 
 import melee.version
-from melee import characterstats, dtmreader, menuhelper, stages, techskill
+from melee import characterdata, dtmreader, framedata, menuhelper, stages, techskill
 from melee.controller import Controller, ControllerState
 from melee.dolphin import Dolphin
 from melee.enums import Action, Button, Character, Menu, ProjectileSubtype, Stage

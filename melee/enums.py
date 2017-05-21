@@ -96,6 +96,8 @@ class Action(Enum):
     TURNING_RUN = 0x13
     DASHING = 0x14
     RUNNING = 0x15
+    RUN_DIRECT = 0x16
+    RUN_BRAKE = 0x17
     KNEE_BEND = 0x18  # pre-jump animation.
     JUMPING_FORWARD = 0x19
     JUMPING_BACKWARD = 0x1A
@@ -175,6 +177,12 @@ class Action(Enum):
     NEUTRAL_TECH = 0xC7
     FORWARD_TECH = 0xC8
     BACKWARD_TECH = 0xC9
+    SHIELD_BREAK_FLY = 0xCD
+    SHIELD_BREAK_FALL = 0xCE
+    SHIELD_BREAK_DOWN_U = 0xCF
+    SHIELD_BREAK_DOWN_D = 0xD0
+    SHIELD_BREAK_STAND_U = 0xD1
+    SHIELD_BREAK_STAND_D = 0xD2
     GRAB = 0xD4
     GRAB_PULLING = 0xD5
     GRAB_RUNNING = 0xD6
@@ -209,9 +217,14 @@ class Action(Enum):
     EDGE_ATTACK_QUICK = 0x101  # >= 100% damage
     EDGE_ROLL_SLOW = 0x102  # >= 100% damage
     EDGE_ROLL_QUICK = 0x103  # < 100% damage
+    EDGE_JUMP_1_SLOW = 0x104
+    EDGE_JUMP_2_SLOW = 0x105
+    EDGE_JUMP_1_QUICK = 0x106
+    EDGE_JUMP_2_QUICK = 0x107
     ENTRY = 0x142  # Start of match. Can't move
     ENTRY_START = 0x143  # Start of match. Can't move
     ENTRY_END = 0x144  # Start of match. Can't move
+    LASER_GUN_PULL = 0x155
     NEUTRAL_B_CHARGING = 0x156
     NEUTRAL_B_ATTACKING = 0x157
     NEUTRAL_B_FULL_CHARGE = 0x158
@@ -251,7 +264,7 @@ class Action(Enum):
     DOWN_B_AIR = 0x16E
     UP_B_GROUND = 0x16F
     SHINE_RELEASE_AIR = 0x170
-    UP_B = 0x170  # The upswing of the UP-B. (At least for marth)
+    UP_B_AIR = 0x170  # The upswing of the UP-B. (At least for marth)
     MARTH_COUNTER = 0x171
     MARTH_COUNTER_FALLING = 0x173
     WAVEDASH_SLIDE = 0x176
