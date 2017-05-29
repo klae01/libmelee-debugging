@@ -31,6 +31,13 @@ class ControllerType(Enum):
     UNPLUGGED = "0"
 
 
+class AttackState(Enum):
+    WINDUP = 0
+    ATTACKING = 1
+    COOLDOWN = 2
+    NOT_ATTACKING = 3
+
+
 class Character(Enum):
     DOC = 0x00
     MARIO = 0x01
