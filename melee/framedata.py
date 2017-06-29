@@ -5,7 +5,7 @@ from collections import defaultdict
 from itertools import filterfalse
 
 from melee import stages
-from melee.enums import Action, Character
+from melee.enums import Action, AttackState, Character
 
 
 class FrameData:
