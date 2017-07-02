@@ -34,6 +34,7 @@ class FrameData:
                 "hitbox_4_y",
                 "locomotion_x",
                 "locomotion_y",
+                "iasa",
             ]
             self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
             self.writer.writeheader()
@@ -69,6 +70,7 @@ class FrameData:
                     "hitbox_4_y": float(frame["hitbox_4_y"]),
                     "locomotion_x": float(frame["locomotion_x"]),
                     "locomotion_y": float(frame["locomotion_y"]),
+                    "iasa": frame["iasa"] == "True",
                 }
 
         # read the character data csv
@@ -438,6 +440,7 @@ class FrameData:
             "hitbox_4_size": gamestate.opponent_state.hitbox_4_size,
             "locomotion_x": xspeed,
             "locomotion_y": yspeed,
+            "iasa": gamestate.opponent_state.iasa,
         }
 
         if not gamestate.opponent_state.hitbox_1_status:

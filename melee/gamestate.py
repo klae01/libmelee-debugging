@@ -8,6 +8,7 @@ from collections import defaultdict
 from struct import *
 
 from melee import enums, stages
+from melee.enums import Action
 
 """Represents the state of a running game of Melee at a given moment in time"""
 
@@ -92,6 +93,18 @@ class GameState:
             if str(player.action) in self.zero_indices[str(player.character)]:
                 player.action_frame = player.action_frame + 1
 
+    # The IASA flag doesn't set or reset for special attacks.
+    #   So let's just set IASA to False for all non-A attacks.
+    def fixiasa(self):
+        for index, player in self.player.items():
+            # Luckily for us, all the A-attacks are in a contiguous place in the enums!
+            #   So we don't need to call them out one by one
+            if (
+                player.action.value < Action.NEUTRAL_ATTACK_1.value
+                or player.action.value > Action.DAIR.value
+            ):
+                player.iasa = False
+
     """Process one new memory update
        returns True if the frame is finished processing (no more updates this frame)
        Run this in a loop until it returns returns True, then press your buttons,
@@ -123,6 +136,7 @@ class GameState:
             xdist = self.ai_state.x - self.opponent_state.x
             ydist = self.ai_state.y - self.opponent_state.y
             self.distance = math.sqrt((xdist**2) + (ydist**2))
+            self.fixiasa()
             self.fixframeindexing()
             return True
         if label == "stage":
@@ -335,6 +349,9 @@ class GameState:
         if label == "hitbox_4_y":
             self.player[player_int].hitbox_4_y = unpack("<f", mem_update[1])[0]
             return False
+        if label == "iasa":
+            self.player[player_int].iasa = bool(unpack("<I", mem_update[1])[0] >> 31)
+            return False
         if label == "projectiles":
             # Only once per new frame that we get a projectile, clear the list out
             if self.newframe:
@@ -413,6 +430,7 @@ class PlayerState:
     coin_down = False
     controller_status = enums.ControllerStatus.CONTROLLER_UNPLUGGED
     off_stage = False
+    iasa = 0
     hitbox_1_size = 0
     hitbox_2_size = 0
     hitbox_3_size = 0
@@ -429,7 +447,7 @@ class PlayerState:
     hitbox_3_y = 0
     hitbox_4_x = 0
     hitbox_4_y = 0
-    # For dev use only
+    # For internal use only, ignore these
     next_x = 0
     next_y = 0
     prev_x = 0
