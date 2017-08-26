@@ -36,6 +36,7 @@ class FrameData:
                 "locomotion_y",
                 "iasa",
                 "facing_changed",
+                "projectile",
             ]
             self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
             self.writer.writeheader()
@@ -48,6 +49,7 @@ class FrameData:
             self.actionrows = []
 
             self.prevfacing = {}
+            self.prevprojectilecount = {}
 
         # Read the existing framedata
         path = os.path.dirname(os.path.realpath(__file__))
@@ -82,6 +84,7 @@ class FrameData:
                     "locomotion_y": float(frame["locomotion_y"]),
                     "iasa": frame["iasa"] == "True",
                     "facing_changed": frame["facing_changed"] == "True",
+                    "projectile": frame["projectile"] == "True",
                 }
 
         # read the character data csv
@@ -158,8 +161,35 @@ class FrameData:
             Action.SHIELD_BREAK_STAND_D,
             Action.TAUNT_RIGHT,
             Action.TAUNT_LEFT,
+            Action.SHIELD_BREAK_TEETER,
         ]
         return action in rolls
+
+    def isbmove(self, character, action):
+        # If we're missing it, don't call it a B move
+        if action == Action.UNKNOWN_ANIMATION:
+            return False
+
+        # Don't consider peach float to be a B move
+        #   But the rest of her float aerials ARE
+        if character == Character.PEACH and action in [
+            Action.LASER_GUN_PULL,
+            Action.NEUTRAL_B_CHARGING,
+            Action.NEUTRAL_B_ATTACKING,
+        ]:
+            return False
+        # Peach smashes also shouldn't be B moves
+        if character == Character.PEACH and action in [
+            Action.SWORD_DANCE_2_MID,
+            Action.SWORD_DANCE_1,
+            Action.SWORD_DANCE_2_HIGH,
+        ]:
+            return False
+
+        if Action.LASER_GUN_PULL.value <= action.value:
+            return True
+
+        return False
 
     # Returns boolean on if the given action is an attack (contains a hitbox)
     def isattack(self, character, action):
@@ -170,6 +200,7 @@ class FrameData:
                 or frame["hitbox_2_status"]
                 or frame["hitbox_3_status"]
                 or frame["hitbox_4_status"]
+                or frame["projectile"]
             ):
                 return True
         return False
@@ -410,6 +441,7 @@ class FrameData:
                 or frame["hitbox_2_status"]
                 or frame["hitbox_3_status"]
                 or frame["hitbox_4_status"]
+                or frame["projectile"]
             ):
                 hitboxes.append(action_frame)
         if not hitboxes:
@@ -429,6 +461,7 @@ class FrameData:
                 or frame["hitbox_2_status"]
                 or frame["hitbox_3_status"]
                 or frame["hitbox_4_status"]
+                or frame["projectile"]
             ):
                 hitboxes.append(action_frame)
         if not hitboxes:
@@ -471,31 +504,34 @@ class FrameData:
                 or frame["hitbox_2_status"]
                 or frame["hitbox_3_status"]
                 or frame["hitbox_4_status"]
+                or frame["projectile"]
             ):
                 hitboxes.append(action_frame)
         if not hitboxes:
             return -1
         return max(hitboxes)
 
-    # This is a helper function to remove all the non-attacking, non-rolling actions
+    # This is a helper function to remove all the non-attacking, non-rolling, non-B move actions
     def cleanupcsv(self):
         # Make a list of all the attacking action names
         attacks = []
         for row in self.rows:
             if (
-                row["hitbox_1_status"] == True
-                or row["hitbox_2_status"] == True
-                or row["hitbox_3_status"] == True
-                or row["hitbox_4_status"] == True
+                row["hitbox_1_status"]
+                or row["hitbox_2_status"]
+                or row["hitbox_3_status"]
+                or row["hitbox_4_status"]
+                or row["projectile"]
             ):
                 attacks.append(row["action"])
         # remove duplicates
         attacks = list(set(attacks))
-        # rows[:] = filterfalse(determine, somelist)
         # Make a second pass, removing anything not in the list
         for row in list(self.rows):
-            if row["action"] not in attacks and not self.isroll(
-                Character(row["character"]), Action(row["action"])
+            if (
+                row["action"] not in attacks
+                and not self.isroll(Character(row["character"]), Action(row["action"]))
+                and not self.isbmove(Character(row["character"]), Action(row["action"]))
             ):
                 self.rows.remove(row)
 
@@ -600,6 +636,7 @@ class FrameData:
             "locomotion_y": yspeed,
             "iasa": gamestate.opponent_state.iasa,
             "facing_changed": False,
+            "projectile": False,
         }
 
         # Do we already have the previous frame recorded?
@@ -645,6 +682,20 @@ class FrameData:
             row["hitbox_4_y"] = 0
             row["hitbox_4_size"] = 0
 
+        # If this frame goes from having 0 projectiles to more than 0, then flag it
+        oldprojcount = self.prevprojectilecount.get(gamestate.opponent_state.action)
+        if (
+            oldprojcount != None
+            and oldprojcount == 0
+            and len(gamestate.projectiles) > 0
+        ):
+            # Turnips are thrown, so don't count the turnip pull
+            if (
+                gamestate.opponent_state.character != Character.PEACH
+                or gamestate.opponent_state.action != Action.SWORD_DANCE_3_HIGH
+            ):
+                row["projectile"] = True
+
         alreadythere = False
         for i in self.rows:
             if (
@@ -675,6 +726,9 @@ class FrameData:
 
         self.prevfacing[gamestate.opponent_state.action] = (
             gamestate.opponent_state.facing
+        )
+        self.prevprojectilecount[gamestate.opponent_state.action] = len(
+            gamestate.projectiles
         )
 
     def saverecording(self):
