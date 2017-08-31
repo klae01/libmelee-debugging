@@ -147,6 +147,7 @@ def choosecharacter(character, gamestate, controller, swag=False, start=False):
 
 def choosestage(stage, gamestate, controller):
     if gamestate.frame < 20:
+        controller.empty_input()
         return
     target_x, target_y = 0, 0
     if stage == enums.Stage.BATTLEFIELD:
