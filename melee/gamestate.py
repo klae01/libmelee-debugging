@@ -145,8 +145,8 @@ class GameState:
 
                 if (
                     abs(self.player[i].x) > stages.edgegroundposition(self.stage)
-                    or self.player[i].y < -5
-                ):
+                    or self.player[i].y < -6
+                ) and not self.player[i].on_ground:
                     self.player[i].off_stage = True
                 else:
                     self.player[i].off_stage = False
