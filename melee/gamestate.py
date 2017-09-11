@@ -164,7 +164,7 @@ class GameState:
                     self.player[i].action == Action.EDGE_CATCHING
                     and self.player[i].action_frame == 1
                 ):
-                    self.player[i].invulnerability_left = 29
+                    self.player[i].invulnerability_left = 36
 
                 # Which character are we right now?
                 if self.player[i].character in [Character.SHEIK, Character.ZELDA]:
