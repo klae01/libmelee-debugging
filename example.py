@@ -138,6 +138,8 @@ while True:
         melee.menuhelper.choosecharacter(
             character=melee.enums.Character.FOX,
             gamestate=gamestate,
+            port=args.port,
+            opponent_port=args.opponent,
             controller=controller,
             swag=True,
             start=True,
