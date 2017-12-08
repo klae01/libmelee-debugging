@@ -119,7 +119,10 @@ while True:
         )
 
     # What menu are we in?
-    if gamestate.menu_state == melee.enums.Menu.IN_GAME:
+    if gamestate.menu_state in [
+        melee.enums.Menu.IN_GAME,
+        melee.enums.Menu.SUDDEN_DEATH,
+    ]:
         if args.framerecord:
             framedata.recordframe(gamestate)
         # XXX: This is where your AI does all of its stuff!
