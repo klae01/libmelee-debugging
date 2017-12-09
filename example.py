@@ -51,7 +51,7 @@ parser.add_argument(
     "-r",
     default=False,
     action="store_true",
-    help="Records frame data from the match, stores into framedata.csv",
+    help="(DEVELOPMENT ONLY) Records frame data from the match, stores into framedata.csv.",
 )
 
 args = parser.parse_args()
