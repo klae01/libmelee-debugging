@@ -3,6 +3,7 @@ import os
 import pwd
 import shutil
 import subprocess
+import sys
 
 from melee import enums
 
