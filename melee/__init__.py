@@ -10,3 +10,4 @@ from melee.dolphin import Dolphin
 from melee.enums import Action, Button, Character, Menu, ProjectileSubtype, Stage
 from melee.gamestate import GameState
 from melee.logger import Logger
+from melee.wii import Wii
