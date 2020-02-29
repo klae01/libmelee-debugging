@@ -46,7 +46,7 @@ def choosecharacter(
     wiggleroom = 1.5
 
     # We are already set, so let's taunt our opponent
-    if ai_state.character == character and swag and not start:
+    if ai_state.character_selected == character and swag and not start:
         delta_x = 3 * math.cos(gamestate.frame / 1.5)
         delta_y = 3 * math.sin(gamestate.frame / 1.5)
 
@@ -86,7 +86,7 @@ def choosecharacter(
         return
 
     # If character is selected, and we're in of the area, and coin is down, then we're good
-    if (ai_state.character == character) and ai_state.coin_down:
+    if (ai_state.character_selected == character) and ai_state.coin_down:
         if (
             start
             and gamestate.ready_to_start
@@ -107,7 +107,7 @@ def choosecharacter(
         #   then the coin must be somewhere else.
         #   Press B to reclaim the coin
         controller.tilt_analog(enums.Button.BUTTON_MAIN, 0.5, 0.5)
-        if (ai_state.character != character) and (ai_state.coin_down):
+        if (ai_state.character_selected != character) and (ai_state.coin_down):
             controller.press_button(enums.Button.BUTTON_B)
             return
         # Press A to select our character
@@ -229,7 +229,7 @@ def changecontrollerstatus(
     wiggleroom = 1.5
 
     correctcharacter = (character == None) or (
-        character == gamestate.player[targetport].character
+        character == gamestate.player[targetport].character_selected
     )
 
     # if we're in the right state already, do nothing

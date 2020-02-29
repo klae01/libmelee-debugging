@@ -201,6 +201,8 @@ class Dolphin(Console):
             command.append("-u")
             command.append(dolphin_config_path)
         self.process = subprocess.Popen(command)
+        # TODO proper error tracking here
+        return True
 
     """Terminate the dolphin process"""
 
@@ -272,7 +274,7 @@ class Dolphin(Console):
     # Melee's indexing of action frames is wildly inconsistent.
     #   Here we adjust all of the frames to be indexed at 1 (so math is easier)
     def __fixframeindexing(self, gamestate):
-        for index, player in gamestate.player.items():
+        for _, player in gamestate.player.items():
             if player.action.value in self.zero_indices[player.character.value]:
                 player.action_frame = player.action_frame + 1
 
@@ -367,9 +369,7 @@ class Dolphin(Console):
                     gamestate.player[i].invulnerable = gamestate.player[
                         i + 4
                     ].invulnerable
-                    gamestate.player[i].hitlag_frames_left = gamestate.player[
-                        i + 4
-                    ].hitlag_frames_left
+                    gamestate.player[i].hitlag = gamestate.player[i + 4].hitlag
                     gamestate.player[i].hitstun_frames_left = gamestate.player[
                         i + 4
                     ].hitstun_frames_left
@@ -463,11 +463,24 @@ class Dolphin(Console):
             gamestate.player[player_int]._next_y = unpack("<f", mem_update[1])[0]
             return False
         if label == "character":
-            temp = unpack("<I", mem_update[1])[0] >> 24
+            temp = unpack("<I", mem_update[1])[0]
             try:
                 gamestate.player[player_int].character = enums.Character(temp)
             except ValueError:
                 gamestate.player[player_int].character = (
+                    enums.Character.UNKNOWN_CHARACTER
+                )
+            return False
+        if label == "character_selected":
+            temp = unpack("<I", mem_update[1])[0] >> 24
+            try:
+                # Convert this character ID to an "internal" character ID
+                #   to match with the enum values
+                gamestate.player[player_int].character_selected = (
+                    enums.convertToInternalCharacterID(temp)
+                )
+            except ValueError:
+                gamestate.player[player_int].character_selected = (
                     enums.Character.UNKNOWN_CHARACTER
                 )
             return False
@@ -501,10 +514,11 @@ class Dolphin(Console):
                 gamestate.player[player_int].invulnerable >> 31
             )
             return False
-        if label == "hitlag_frames_left":
+        # We only really care if the character is in hitlag. So convert to bool
+        if label == "hitlag":
             temp = unpack("<f", mem_update[1])[0]
             try:
-                gamestate.player[player_int].hitlag_frames_left = int(temp)
+                gamestate.player[player_int].hitlag = int(temp) > 0
             except ValueError:
                 pass
             return False

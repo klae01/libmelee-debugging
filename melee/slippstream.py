@@ -8,9 +8,8 @@ This can be used to talk to some server implementing the SlippiComm protocol
 import errno
 import select
 import signal
+import socket
 from enum import Enum
-from socket import *
-from socket import error as SocketError
 from struct import pack, unpack
 from sys import argv
 
@@ -54,7 +53,6 @@ class SlippstreamClient(object):
         self.remote_addr = None
         self.remote_port = None
         self.buf = bytearray()
-        self.eventsize = [0] * 0x100
         self.frame_num = None
         self.server = None
         self.out = None
@@ -63,20 +61,12 @@ class SlippstreamClient(object):
         self.address = address
         self.port = port
 
-        self.frame_hook = None
-
     def shutdown(self):
         if self.server != None:
             self.server.close()
             return True
         else:
             return None
-
-    def register_frame_hook(self, user_func):
-        """Register a function (`def hook(frame_num)`) to run immediately
-        after the client has received a FRAME_START event.
-        """
-        self.frame_hook = user_func
 
     def read_message(self):
         """Read an entire message from the registered socket.
@@ -118,7 +108,7 @@ class SlippstreamClient(object):
                         print(hexdump(self.buf))
                         return None
 
-                except SocketError as e:
+                except socket.error as e:
                     if e.args[0] == errno.EWOULDBLOCK:
                         continue
                     else:
@@ -126,12 +116,15 @@ class SlippstreamClient(object):
                         return None
 
     def connect(self):
-        """Connect to the server"""
+        """Connect to the server
+
+        Returns True on success, False on failure
+        """
 
         # If we don't have a slippi address, let's autodiscover it
         if not self.address:
             # Slippi broadcasts a UDP message on port
-            sock = socket(AF_INET, SOCK_DGRAM)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             # Slippi sends an advertisement every 10 seconds. So 20 should be enough
             sock.settimeout(20)
             sock.bind(("", 20582))
@@ -143,27 +136,27 @@ class SlippstreamClient(object):
             except socket.timeout:
                 print(
                     "ERROR: Could not autodiscover a slippi console, and "
-                    + "no address was given. Make sure the Wii/Slippi console is on"
+                    + "no address was given. Make sure the Wii/Slippi console is on "
                     + "and/or supply a known IP address"
                 )
-                return
+                return False
 
         if self.server != None:
             print("Connection already established")
-            return None
+            return True
 
         # Try to connect to the server and send a handshake
-        self.server = socket(AF_INET, SOCK_STREAM)
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.server.connect((self.address, self.port))
             self.server.send(self.__new_handshake())
-        except SocketError as e:
+        except socket.error as e:
             print(e)
             if e.args[0] == errno.ECONNREFUSED:
                 print("Returned ECONNREFUSED ({}:{})".format(self.address, self.port))
-            return None
+            return False
 
-        self.server.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # self.server.setblocking(0)
         self.inp = [self.server]
         self.out = []
