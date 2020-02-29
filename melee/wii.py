@@ -5,7 +5,7 @@ import ubjson
 
 from melee import enums
 from melee.console import Console
-from melee.gamestate import GameState
+from melee.gamestate import GameState, Projectile
 from melee.slippstream import CommType, EventType, SlippstreamClient
 
 
@@ -168,6 +168,20 @@ class Wii:
 
             elif EventType(event_bytes[0]) == EventType.ITEM_UPDATE:
                 # TODO projectiles
+                projectile = Projectile()
+                projectile.x = unpack(">f", event_bytes[0x14 : 0x14 + 4])[0]
+                projectile.y = unpack(">f", event_bytes[0x18 : 0x18 + 4])[0]
+                projectile.x_speed = unpack(">f", event_bytes[0x0C : 0x0C + 4])[0]
+                projectile.y_speed = unpack(">f", event_bytes[0x10 : 0x10 + 4])[0]
+                try:
+                    projectile.subtype = enums.ProjectileSubtype(
+                        unpack(">H", event_bytes[0x05 : 0x05 + 2])[0]
+                    )
+                except ValueError:
+                    projectile.subtype = enums.UNKNOWN_PROJECTILE
+                # Add the projectile to the gamestate list
+                gamestate.projectiles.append(projectile)
+
                 event_bytes = event_bytes[event_size:]
                 continue
 
