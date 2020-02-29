@@ -354,12 +354,6 @@ class Dolphin(Console):
                 ):
                     gamestate.player[i].invulnerability_left = 36
 
-                # Which character are we right now?
-                if gamestate.player[i].character in [Character.SHEIK, Character.ZELDA]:
-                    if gamestate.player[i].transformed == gamestate.player[i].iszelda:
-                        gamestate.player[i].character = Character.SHEIK
-                    else:
-                        gamestate.player[i].character = Character.ZELDA
                 # If the player is transformed, then copy over the sub-character attributes
                 if gamestate.player[i].transformed:
                     gamestate.player[i].action = gamestate.player[i + 4].action
@@ -664,13 +658,6 @@ class Dolphin(Console):
             if temp == 16777216:
                 status = True
             gamestate.player[player_int].transformed = status
-            return False
-        if label == "iszelda":
-            temp = unpack("<I", mem_update[1])[0]
-            status = False
-            if temp == 18:
-                status = True
-            gamestate.player[player_int].iszelda = status
             return False
         if label == "projectiles":
             # Only once per new frame that we get a projectile, clear the list out
