@@ -5,9 +5,8 @@ Currently only works on Linux/OSX
 
 import melee.version
 from melee import dtmreader, framedata, menuhelper, stages, techskill
+from melee.console import Console
 from melee.controller import Controller, ControllerState
-from melee.dolphin import Dolphin
 from melee.enums import Action, Button, Character, Menu, ProjectileSubtype, Stage
 from melee.gamestate import GameState
 from melee.logger import Logger
-from melee.wii import Wii
