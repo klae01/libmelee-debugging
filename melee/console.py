@@ -59,7 +59,7 @@ class Console:
                     "(You should only see this warning once)"
                 )
 
-            pipes_path += "Bot" + str(ai_port)
+            pipes_path += "slippibot" + str(ai_port)
             if not os.path.exists(pipes_path):
                 os.mkfifo(pipes_path)
 
@@ -150,7 +150,7 @@ class Console:
             config.add_section(section)
 
         if controllertype == enums.ControllerType.STANDARD:
-            config.set(section, "Device", "Pipe/0/Bot" + str(port))
+            config.set(section, "Device", "Pipe/0/slippibot" + str(port))
             config.set(section, "Buttons/A", "Button A")
             config.set(section, "Buttons/B", "Button B")
             config.set(section, "Buttons/X", "Button X")
@@ -442,7 +442,7 @@ class Console:
 
     def get_dolphin_pipes_path(self, port):
         """Get the path of the named pipe input file for the given controller port"""
-        return self.get_dolphin_home_path() + "/Pipes/Bot" + str(port)
+        return self.get_dolphin_home_path() + "/Pipes/slippibot" + str(port)
 
     # Melee's indexing of action frames is wildly inconsistent.
     #   Here we adjust all of the frames to be indexed at 1 (so math is easier)

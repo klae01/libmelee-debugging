@@ -113,10 +113,8 @@ class SlippstreamClient(object):
             sock.settimeout(20)
             sock.bind(("", 20582))
             try:
-                print("Trying to autodiscover Slippi...")
                 message = sock.recvfrom(1024)
                 self.address = message[1][0]
-                print("Found Slippi at IP address: ", self.address)
             except socket.timeout:
                 print(
                     "ERROR: Could not autodiscover a slippi console, and "
