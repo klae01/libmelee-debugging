@@ -133,13 +133,12 @@ class SlippstreamClient(object):
             self.server.connect((self.address, self.port))
             self.server.send(self.__new_handshake())
         except socket.error as e:
-            print(e)
             if e.args[0] == errno.ECONNREFUSED:
-                print("Returned ECONNREFUSED ({}:{})".format(self.address, self.port))
+                self.server = None
+                return False
+            self.server = None
             return False
 
-        # self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # self.server.setblocking(True)
         return True
 
     def __new_handshake(

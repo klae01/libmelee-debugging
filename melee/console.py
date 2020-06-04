@@ -1,6 +1,7 @@
 import configparser
 import csv
 import os
+import platform
 import pwd
 import subprocess
 import time
@@ -22,16 +23,14 @@ class Console:
         ai_port,
         opponent_port,
         opponent_type,
-        config_path="",
-        home_path="",
+        dolphin_executable_path=None,
         logger=None,
     ):
         self.logger = logger
         self.ai_port = ai_port
         self.opponent_port = opponent_port
         self.is_dolphin = is_dolphin
-        self.config_path = config_path
-        self.home_path = home_path
+        self.dolphin_executable_path = dolphin_executable_path
 
         self.processingtime = 0
         self._frametimestamp = time.time()
@@ -94,21 +93,17 @@ class Console:
 
         Returns boolean of success"""
         self.slippstream = SlippstreamClient(self.slippi_address, self.slippi_port)
-        return self.slippstream.connect()
+        # It can take a short amount of time after starting the emulator
+        #   for the actual server to start. So try a few times before giving up.
+        for i in range(4):
+            if self.slippstream.connect():
+                return True
+        return False
 
-    def run(
-        self,
-        iso_path=None,
-        movie_path=None,
-        dolphin_executable_path=None,
-        dolphin_config_path=None,
-    ):
+    def run(self, iso_path=None, movie_path=None, dolphin_config_path=None):
         """Run dolphin-emu"""
         if self.is_dolphin:
-            if dolphin_executable_path is not None:
-                command = [dolphin_executable_path]
-            else:
-                command = ["dolphin-emu"]
+            command = [self.dolphin_executable_path + "/dolphin-emu"]
             if not self.render:
                 # Use the "Null" renderer
                 command.append("-v")
@@ -362,7 +357,7 @@ class Console:
                         unpack(">H", event_bytes[0x05 : 0x05 + 2])[0]
                     )
                 except ValueError:
-                    projectile.subtype = enums.UNKNOWN_PROJECTILE
+                    projectile.subtype = enums.ProjectileSubtype.UNKNOWN_PROJECTILE
                 # Add the projectile to the gamestate list
                 gamestate.projectiles.append(projectile)
 
@@ -381,9 +376,8 @@ class Console:
 
     def get_dolphin_home_path(self):
         """Return the path to dolphin's home directory"""
-        # If a home path is set manually, use that
-        if self.home_path:
-            return self.home_path
+        if self.dolphin_executable_path:
+            return self.dolphin_executable_path + "/User/"
 
         home_path = pwd.getpwuid(os.getuid()).pw_dir
         legacy_config_path = home_path + "/.dolphin-emu/"
@@ -412,9 +406,8 @@ class Console:
     def get_dolphin_config_path(self):
         """Return the path to dolphin's config directory
         (which is not necessarily the same as the home path)"""
-        # If a config path is set manually, use that
-        if self.config_path:
-            return self.config_path
+        if self.dolphin_executable_path:
+            return self.dolphin_executable_path + "/User/Config/"
 
         home_path = pwd.getpwuid(os.getuid()).pw_dir
         legacy_config_path = home_path + "/.dolphin-emu/"
@@ -442,6 +435,8 @@ class Console:
 
     def get_dolphin_pipes_path(self, port):
         """Get the path of the named pipe input file for the given controller port"""
+        if platform.system() == "Windows":
+            return "\\\\.\\pipe\\slippibot" + str(port)
         return self.get_dolphin_home_path() + "/Pipes/slippibot" + str(port)
 
     # Melee's indexing of action frames is wildly inconsistent.
