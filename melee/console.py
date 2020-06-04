@@ -2,10 +2,10 @@ import configparser
 import csv
 import os
 import platform
-import pwd
 import subprocess
 import time
 from collections import defaultdict
+from pathlib import Path
 from socket import *
 from struct import unpack
 
@@ -379,7 +379,7 @@ class Console:
         if self.dolphin_executable_path:
             return self.dolphin_executable_path + "/User/"
 
-        home_path = pwd.getpwuid(os.getuid()).pw_dir
+        home_path = str(Path.home())
         legacy_config_path = home_path + "/.dolphin-emu/"
 
         # Are we using a legacy Linux home path directory?
@@ -409,7 +409,7 @@ class Console:
         if self.dolphin_executable_path:
             return self.dolphin_executable_path + "/User/Config/"
 
-        home_path = pwd.getpwuid(os.getuid()).pw_dir
+        home_path = str(Path.home())
 
         if platform.system() == "Windows":
             return home_path + "\\Dolphin Emulator\\Config\\"
