@@ -3,6 +3,7 @@ import csv
 import os
 import platform
 import subprocess
+import sys
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -49,18 +50,19 @@ class Console:
             pipes_path = config_path + "Pipes/"
             path = os.path.dirname(os.path.realpath(__file__))
 
-            # Create the Pipes directory if it doesn't already exist
-            if not os.path.exists(pipes_path):
-                os.makedirs(pipes_path)
-                print(
-                    "WARNING: Had to create a Pipes directory in Dolphin just now. "
-                    "You may need to restart Dolphin and this program in order for this to work. "
-                    "(You should only see this warning once)"
-                )
+            if platform.system() != "Windows":
+                # Create the Pipes directory if it doesn't already exist
+                if not os.path.exists(pipes_path):
+                    os.makedirs(pipes_path)
+                    print(
+                        "WARNING: Had to create a Pipes directory in Dolphin just now. "
+                        "You may need to restart Dolphin and this program in order for this to work. "
+                        "(You should only see this warning once)"
+                    )
 
-            pipes_path += "slippibot" + str(ai_port)
-            if not os.path.exists(pipes_path):
-                os.mkfifo(pipes_path)
+                pipes_path += "slippibot" + str(ai_port)
+                if not os.path.exists(pipes_path):
+                    os.mkfifo(pipes_path)
 
             # setup the controllers specified
             self.setup_dolphin_controller(ai_port)
