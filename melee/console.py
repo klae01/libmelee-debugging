@@ -337,6 +337,9 @@ class Console:
                 gamestate.player[controller_port].jumps_left = unpack(
                     ">B", event_bytes[0x32 : 0x32 + 1]
                 )[0]
+                gamestate.player[controller_port].invulnerable = (
+                    int(unpack(">B", event_bytes[0x34 : 0x34 + 1])[0]) != 0
+                )
 
                 event_bytes = event_bytes[event_size:]
                 continue
