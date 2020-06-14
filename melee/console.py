@@ -1,5 +1,6 @@
 import configparser
 import csv
+import math
 import os
 import platform
 import subprocess
@@ -399,6 +400,20 @@ class Console:
 
             elif EventType(event_bytes[0]) == EventType.FRAME_BOOKEND:
                 self._prev_gamestate = gamestate
+
+                # Calculate helper distance variable
+                #   This is a bit kludgey.... :/
+                i = 0
+                player_one_x, player_one_y, player_two_x, player_two_y = 0, 0, 0, 0
+                for _, player_state in gamestate.player.items():
+                    if i == 0:
+                        player_one_x, player_one_y = player_state.x, player_state.y
+                    if i == 1:
+                        player_two_x, player_two_y = player_state.x, player_state.y
+                    i += 1
+                xdist = player_one_x - player_two_x
+                ydist = player_one_y - player_two_y
+                gamestate.distance = math.sqrt((xdist**2) + (ydist**2))
                 event_bytes = event_bytes[event_size:]
                 return True
 
