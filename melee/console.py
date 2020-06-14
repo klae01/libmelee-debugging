@@ -13,7 +13,7 @@ from struct import unpack
 
 import ubjson
 
-from melee import enums
+from melee import enums, stages
 from melee.gamestate import Action, GameState, Projectile
 from melee.slippstream import CommType, EventType, SlippstreamClient
 
@@ -390,6 +390,16 @@ class Console:
                 # Take off the warning if the player does an action other than dashing
                 if gamestate.player[controller_port].action != Action.DASHING:
                     gamestate.player[controller_port].moonwalkwarning = False
+
+                # "off_stage" helper
+                if (
+                    abs(gamestate.player[controller_port].x)
+                    > stages.edgegroundposition(gamestate.stage)
+                    or gamestate.player[controller_port].y < -6
+                ) and not gamestate.player[controller_port].on_ground:
+                    gamestate.player[controller_port].off_stage = True
+                else:
+                    gamestate.player[controller_port].off_stage = False
 
                 event_bytes = event_bytes[event_size:]
                 continue
