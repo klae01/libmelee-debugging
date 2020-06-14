@@ -339,6 +339,22 @@ class Console:
                     int(unpack(">B", event_bytes[0x34 : 0x34 + 1])[0]) != 0
                 )
 
+                gamestate.player[controller_port].speed_air_x_self = unpack(
+                    ">f", event_bytes[0x35 : 0x35 + 4]
+                )[0]
+                gamestate.player[controller_port].speed_y_self = unpack(
+                    ">f", event_bytes[0x39 : 0x39 + 4]
+                )[0]
+                gamestate.player[controller_port].speed_x_attack = unpack(
+                    ">f", event_bytes[0x3D : 0x3D + 4]
+                )[0]
+                gamestate.player[controller_port].speed_y_attack = unpack(
+                    ">f", event_bytes[0x41 : 0x41 + 4]
+                )[0]
+                gamestate.player[controller_port].speed_ground_x_self = unpack(
+                    ">f", event_bytes[0x45 : 0x45 + 4]
+                )[0]
+
                 # Keep track of a player's invulnerability due to respawn or ledge grab
                 gamestate.player[controller_port].invulnerability_left = max(
                     0,
