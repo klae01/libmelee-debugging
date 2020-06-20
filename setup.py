@@ -3,6 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name="melee",
     packages=["melee"],
+    install_requires=["hexdump", "serial", "py-ubjson"],
     version="0.1.0",
     description="Open API for making your own Smash Bros: Melee AI",
     author="AltF4",
