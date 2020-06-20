@@ -16,7 +16,7 @@ def check_port(value):
     if ivalue < 1 or ivalue > 4:
         raise argparse.ArgumentTypeError(
             "%s is an invalid controller port. \
-         Must be 1, 2, 3, or 4."
+                                         Must be 1, 2, 3, or 4."
             % value
         )
     return ivalue
@@ -112,16 +112,13 @@ console = melee.console.Console(
     opponent_port=args.opponent,
     opponent_type=opponent_type,
     dolphin_executable_path=args.dolphin_executable_path,
+    slippi_address=args.address,
     logger=log,
 )
 
 # Dolphin has an optional mode to not render the game's visuals
 #   This is useful for BotvBot matches
 console.render = True
-
-# If not set by the user, this will be an empty string, which will trigger
-#   an autodiscover process
-console.slippi_address = args.address
 
 # Create our Controller object
 #   The controller is the second primary object your bot will interact with
@@ -206,7 +203,7 @@ while True:
     ]:
         if args.framerecord:
             framedata.recordframe(gamestate)
-        # XXX: This is where your AI does all of its stuff!
+        # NOTE: This is where your AI does all of its stuff!
         # This line will get hit once per frame, so here is where you read
         #   in the gamestate and decide what buttons to push on the controller
         if args.framerecord:

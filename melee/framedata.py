@@ -1,8 +1,9 @@
+""" Helper functions to be able to query Melee frame data in a way useful to bots """
+
 import csv
 import math
 import os
 from collections import defaultdict
-from itertools import filterfalse
 
 from melee import stages
 from melee.enums import Action, AttackState, Character

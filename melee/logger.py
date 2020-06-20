@@ -1,11 +1,12 @@
 import csv
 import os
-import time
 from datetime import datetime
 from pathlib import Path
 
 
 class Logger:
+    """aaa"""
+
     def __init__(self):
         timestamp = Path(
             str(datetime.now()).replace(" ", "-").replace(":", "-") + ".csv"

@@ -1,10 +1,10 @@
 """Open API written in Python for making your own Smash Bros: Melee AI
 Python3 only
-Currently only works on Linux/OSX
+Works on Linux/OSX/Windows
 """
 
 import melee.version
-from melee import dtmreader, framedata, menuhelper, stages, techskill
+from melee import framedata, menuhelper, stages, techskill
 from melee.console import Console
 from melee.controller import Controller, ControllerState
 from melee.enums import Action, Button, Character, Menu, ProjectileSubtype, Stage
