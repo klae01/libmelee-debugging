@@ -222,7 +222,7 @@ while True:
             port=args.port,
             opponent_port=args.opponent,
             controller=controller,
-            swag=True,
+            swag=False,
             start=False,
         )
     # If we're at the postgame scores screen, spam START

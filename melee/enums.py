@@ -18,6 +18,7 @@ class Menu(Enum):
     IN_GAME = 2
     SUDDEN_DEATH = 3
     POSTGAME_SCORES = 4
+    UNKNOWN_MENU = 0xFF
 
 
 class ControllerStatus(Enum):
