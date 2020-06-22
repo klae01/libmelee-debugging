@@ -3,15 +3,12 @@
 import copy
 import platform
 import sys
-import time
 from struct import pack
 
 import serial
 
 try:
-    import pywintypes
     import win32file
-    import win32pipe
 except ImportError:
     pass
 
@@ -43,7 +40,7 @@ class ControllerState:
         self.l_shoulder = 0
         self.r_shoulder = 0
 
-    def toBytes(self):
+    def to_bytes(self):
         """Serialize the controller state into an 8 byte sequence that the Gamecube uses"""
         buttons_total = 0x0080
         if self.button[enums.Button.BUTTON_A]:
@@ -343,7 +340,7 @@ class Controller:
         else:
             # Command for "send single controller poll" is 'A'
             # Serialize controller state into bytes and send
-            self.tastm32.write(b"A" + self.current.toBytes())
+            self.tastm32.write(b"A" + self.current.to_bytes())
             cmd = self.tastm32.read(1)
 
             if cmd != b"A":

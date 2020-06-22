@@ -1,4 +1,8 @@
-from melee import enums, stages
+""" Gamestate is a single snapshot in time of the game that represents all necessary information
+        to make gameplay decisions
+"""
+
+from melee import enums
 from melee.enums import Action, Character
 
 
@@ -28,10 +32,9 @@ class GameState:
         self.ai_state = self.player[ai_port]
         self.opponent_state = self.player[opponent_port]
 
-    """Return a list representation of the current gamestate
-    Only caring about in-game things, not menus and such"""
-
-    def tolist(self):
+    def to_list(self):
+        """Return a list representation of the current gamestate
+        Only caring about in-game things, not menus and such"""
         thelist = []
         # I don't think that the frame is really relevant here...
         # thelist.append(self.frame)
@@ -44,10 +47,9 @@ class GameState:
         return thelist
 
 
-"""Represents the state of a single player"""
-
-
 class PlayerState:
+    """Represents the state of a single player"""
+
     def __init__(self):
         # This value is what the character currently is IN GAME
         #   So this will have no meaning while in menus
@@ -110,9 +112,8 @@ class PlayerState:
         self._prev_x = 0
         self._prev_x = 0
 
-    """Produces a list representation of the player's state"""
-
-    def tolist(self):
+    def to_list(self):
+        """Produces a list representation of the player's state"""
         thelist = []
         thelist.append(self.x)
         thelist.append(self.y)
@@ -135,26 +136,24 @@ class PlayerState:
         return thelist
 
 
-"""Represents the state of a projectile (items, lasers, etc...)"""
-
-
 class Projectile:
+    """Represents the state of a projectile (items, lasers, etc...)"""
+
     def __init(self):
         self.x = 0
         self.y = 0
         self.x_speed = 0
         self.y_speed = 0
-        self.opponent_owned = True
+        self.owner = -1
         self.subtype = enums.ProjectileSubtype.UNKNOWN_PROJECTILE
 
-    """Produces a list representation of the projectile"""
-
-    def tolist(self):
+    def to_list(self):
+        """Produces a list representation of the projectile"""
         thelist = []
         thelist.append(self.x)
         thelist.append(self.y)
         thelist.append(self.x_speed)
         thelist.append(self.y_speed)
-        thelist.append(int(self.opponent_owned))
+        thelist.append(int(self.owner))
         thelist.append(self.subtype.value)
         return thelist

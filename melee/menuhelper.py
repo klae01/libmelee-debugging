@@ -5,20 +5,19 @@ import math
 
 from melee import enums
 
-"""Choose a character from the character select menu
-    Intended to be called each frame while in the character select menu
-    character = The character you want to pick
-    gamestate = The current gamestate
-    controller = The controller object to press
-    swag = Pick random until you get the character
-    start = Automatically start the match when it's ready
-        NOTE: All controller cursors must be above the character level for this
-        to work. The match won't start otherwise."""
 
-
-def choosecharacter(
+def choose_character(
     character, gamestate, port, opponent_port, controller, swag=False, start=False
 ):
+    """Choose a character from the character select menu
+    Intended to be called each frame while in the character select menu
+        character = The character you want to pick
+        gamestate = The current gamestate
+        controller = The controller object to press
+        swag = Pick random until you get the character
+        start = Automatically start the match when it's ready
+            NOTE: All controller cursors must be above the character level for this
+            to work. The match won't start otherwise."""
     # Figure out where the character is on the select screen
     # NOTE: This assumes you have all characters unlocked
     # Positions will be totally wrong if something is not unlocked
@@ -140,14 +139,12 @@ def choosecharacter(
     controller.empty_input()
 
 
-"""Choose a stage from the stage select menu
+def choose_stage(stage, gamestate, controller):
+    """Choose a stage from the stage select menu
     Intended to be called each frame while in the stage select menu
-    stage = The stage you want to select
-    gamestate = The current gamestate
-    controller = The controller object to press"""
-
-
-def choosestage(stage, gamestate, controller):
+        stage = The stage you want to select
+        gamestate = The current gamestate
+        controller = The controller object to press"""
     if gamestate.frame < 20:
         controller.empty_input()
         return
@@ -194,10 +191,8 @@ def choosestage(stage, gamestate, controller):
     controller.press_button(enums.Button.BUTTON_A)
 
 
-"""Spam the start button"""
-
-
-def skippostgame(controller):
+def skip_postgame(controller):
+    """Spam the start button"""
     # Alternate pressing start and letting go
     if controller.prev.button[enums.Button.BUTTON_START] == False:
         controller.press_button(enums.Button.BUTTON_START)
@@ -205,17 +200,16 @@ def skippostgame(controller):
         controller.release_button(enums.Button.BUTTON_START)
 
 
-"""Switch a given player's controller to be of the given state
-WARNING: There's a condition on this you need to know. The way controllers work
+def change_controller_status(
+    controller, gamestate, targetport, port, status, character=None
+):
+    """Switch a given player's controller to be of the given state
+
+    WARNING: There's a condition on this you need to know. The way controllers work
     in Melee, if a controller is plugged in, only that player can make the status
     go to uplugged. If you've ever played Melee, you probably know this. If your
     friend walks away, you have to press the A button on THEIR controller. (or
     else actually unplug the controller) No way around it."""
-
-
-def changecontrollerstatus(
-    controller, gamestate, targetport, port, status, character=None
-):
     ai_state = gamestate.player[port]
     target_x, target_y = 0, -2.2
     if targetport == 1:
@@ -228,7 +222,7 @@ def changecontrollerstatus(
         target_x = 14
     wiggleroom = 1.5
 
-    correctcharacter = (character == None) or (
+    correctcharacter = (character is None) or (
         character == gamestate.player[targetport].character_selected
     )
 
@@ -256,7 +250,7 @@ def changecontrollerstatus(
 
     # If we get in the right area, press A until we're in the right state
     controller.tilt_analog(enums.Button.BUTTON_MAIN, 0.5, 0.5)
-    if controller.prev.button[enums.Button.BUTTON_A] == False:
+    if not controller.prev.button[enums.Button.BUTTON_A]:
         controller.press_button(enums.Button.BUTTON_A)
     else:
         controller.release_button(enums.Button.BUTTON_A)

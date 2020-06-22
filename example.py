@@ -127,7 +127,7 @@ console.render = True
 controller = melee.controller.Controller(port=args.port, console=console)
 
 
-def signal_handler(signal, frame):
+def signal_handler(sig, frame):
     console.stop()
     if args.debug:
         log.writelog()
@@ -135,7 +135,7 @@ def signal_handler(signal, frame):
         print("Log file created: " + log.filename)
     print("Shutting down cleanly...")
     if args.framerecord:
-        framedata.saverecording()
+        framedata.save_recording()
     sys.exit(0)
 
 
@@ -202,7 +202,7 @@ while True:
         melee.enums.Menu.SUDDEN_DEATH,
     ]:
         if args.framerecord:
-            framedata.recordframe(gamestate)
+            framedata._record_frame(gamestate)
         # NOTE: This is where your AI does all of its stuff!
         # This line will get hit once per frame, so here is where you read
         #   in the gamestate and decide what buttons to push on the controller
@@ -216,7 +216,7 @@ while True:
             )
     # If we're at the character select screen, choose our character
     elif gamestate.menu_state == melee.enums.Menu.CHARACTER_SELECT:
-        melee.menuhelper.choosecharacter(
+        melee.menuhelper.choose_character(
             character=melee.enums.Character.FOX,
             gamestate=gamestate,
             port=args.port,
@@ -227,10 +227,10 @@ while True:
         )
     # If we're at the postgame scores screen, spam START
     elif gamestate.menu_state == melee.enums.Menu.POSTGAME_SCORES:
-        melee.menuhelper.skippostgame(controller=controller)
+        melee.menuhelper.skip_postgame(controller=controller)
     # If we're at the stage select screen, choose a stage
     elif gamestate.menu_state == melee.enums.Menu.STAGE_SELECT:
-        melee.menuhelper.choosestage(
+        melee.menuhelper.choose_stage(
             stage=melee.enums.Stage.POKEMON_STADIUM,
             gamestate=gamestate,
             controller=controller,
