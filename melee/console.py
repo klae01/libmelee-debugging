@@ -1,6 +1,6 @@
 """The Console represents the engine running the game.
 
-This can be Dolphin (IShiiruka), A Nintendont Wii, or an SLP file """
+This can be Dolphin (Ishiiruka), A Nintendont Wii, or an SLP file """
 
 import configparser
 import csv
