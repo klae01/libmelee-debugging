@@ -11,7 +11,6 @@ from enum import Enum
 from struct import pack, unpack
 
 import ubjson
-from hexdump import hexdump
 from ubjson.decoder import DecoderException
 
 
@@ -87,7 +86,6 @@ class SlippstreamClient:
                 except DecoderException as exception:
                     print("ERROR: Decode failure in Slippstream")
                     print(exception)
-                    print(hexdump(self.buf[4:]))
                     self.buf.clear()
                     return None
 
