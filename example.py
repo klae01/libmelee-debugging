@@ -76,6 +76,12 @@ parser.add_argument(
     default=None,
     help="Manually specify the non-installed directory where dolphin is",
 )
+parser.add_argument(
+    "--connect_code",
+    "-t",
+    default="",
+    help="Direct connect code to connect to in Slippi Online",
+)
 
 args = parser.parse_args()
 
@@ -168,6 +174,7 @@ if not controller.connect():
 print("Controller connected")
 
 i = 0
+name_tag_index = 0
 # Main loop
 while True:
     i += 1
@@ -204,15 +211,23 @@ while True:
         melee.enums.Menu.CHARACTER_SELECT,
         melee.Menu.SLIPPI_ONLINE_CSS,
     ]:
-        melee.menuhelper.choose_character(
-            character=melee.enums.Character.FOX,
-            gamestate=gamestate,
-            port=args.port,
-            opponent_port=args.opponent,
-            controller=controller,
-            swag=True,
-            start=False,
-        )
+        if gamestate.submenu == melee.enums.SubMenu.NAME_ENTRY_SUBMENU:
+            name_tag_index = melee.menuhelper.enter_direct_code(
+                gamestate=gamestate,
+                controller=controller,
+                connect_code=args.connect_code,
+                index=name_tag_index,
+            )
+        else:
+            melee.menuhelper.choose_character(
+                character=melee.enums.Character.FOX,
+                gamestate=gamestate,
+                port=args.port,
+                opponent_port=args.opponent,
+                controller=controller,
+                swag=True,
+                start=False,
+            )
     # If we're at the postgame scores screen, spam START
     elif gamestate.menu_state == melee.enums.Menu.POSTGAME_SCORES:
         melee.menuhelper.skip_postgame(controller=controller)
@@ -224,7 +239,14 @@ while True:
             controller=controller,
         )
     elif gamestate.menu_state == melee.enums.Menu.MAIN_MENU:
-        melee.menuhelper.choose_versus_mode(gamestate=gamestate, controller=controller)
+        if args.connect_code:
+            melee.menuhelper.choose_direct_online(
+                gamestate=gamestate, controller=controller
+            )
+        else:
+            melee.menuhelper.choose_versus_mode(
+                gamestate=gamestate, controller=controller
+            )
 
     # Flush any button presses queued up
     controller.flush()
