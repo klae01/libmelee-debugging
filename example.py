@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import argparse
-import os
 import signal
 import sys
 import time
@@ -20,15 +19,6 @@ def check_port(value):
             % value
         )
     return ivalue
-
-
-def is_dir(dirname):
-    """Checks if a path is an actual directory"""
-    if not os.path.isdir(dirname):
-        msg = "{0} is not a directory".format(dirname)
-        raise argparse.ArgumentTypeError(msg)
-    else:
-        return dirname
 
 
 parser = argparse.ArgumentParser(description="Example of libmelee in action")
@@ -63,12 +53,6 @@ parser.add_argument(
     help="(DEVELOPMENT ONLY) Records frame data from the match,"
     "stores into framedata.csv.",
 )
-parser.add_argument(
-    "--console",
-    "-c",
-    default="dolphin",
-    help="Do you want to play on an Emulator (dolphin) or " "hardware console (wii)",
-)
 parser.add_argument("--address", "-a", default="", help="IP address of Slippi/Wii")
 parser.add_argument(
     "--dolphin_executable_path",
@@ -85,10 +69,14 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+# This logger object is useful for retroactively debugging issues in your bot
+#   You can write things to it each frame, and it will create a CSV file describing the match
 log = None
 if args.debug:
     log = melee.logger.Logger()
 
+# This frame data object contains lots of helper functions and values for looking up
+#   various Melee stats, hitboxes, and physics calculations
 framedata = melee.framedata.FrameData(args.framerecord)
 
 # Options here are:
@@ -99,13 +87,6 @@ framedata = melee.framedata.FrameData(args.framerecord)
 opponent_type = melee.enums.ControllerType.UNPLUGGED
 if args.live:
     opponent_type = melee.enums.ControllerType.GCN_ADAPTER
-
-is_dolphin = True
-if args.console == "wii":
-    is_dolphin = False
-elif args.console != "dolphin":
-    print("ERROR: Argument 'console' must be either 'wii' or 'dolphin'")
-    sys.exit(-1)
 
 # Create our Console object.
 #   This will be one of the primary objects that we will interface with.
@@ -133,6 +114,7 @@ console.render = True
 controller = melee.controller.Controller(port=args.port, console=console)
 
 
+# This isn't necessary, but makes it so that Dolphin will get killed when you ^C
 def signal_handler(sig, frame):
     console.stop()
     if args.debug:
@@ -173,14 +155,13 @@ if not controller.connect():
     sys.exit(-1)
 print("Controller connected")
 
-i = 0
-name_tag_index = 0
 # Main loop
 while True:
-    i += 1
     # "step" to the next frame
     gamestate = console.step()
 
+    # The console object keeps track of how long your bot is taking to process frames
+    #   And can warn you if it's taking too long
     if console.processingtime * 1000 > 12:
         print(
             "WARNING: Last frame took "
@@ -200,11 +181,11 @@ while True:
         #   in the gamestate and decide what buttons to push on the controller
         if args.framerecord:
             melee.techskill.upsmashes(
-                ai_state=gamestate.ai_state, controller=controller
+                ai_state=gamestate.player[args.port], controller=controller
             )
         else:
             melee.techskill.multishine(
-                ai_state=gamestate.ai_state, controller=controller
+                ai_state=gamestate.player[args.port], controller=controller
             )
 
     else:
