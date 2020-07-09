@@ -1,4 +1,9 @@
-""" Helper functions to be able to query Melee frame data in a way useful to bots """
+"""Helper functions to be able to query Melee frame data in a way useful to bots
+
+None of the functions and structures here are strictly necessary for making a bot.
+But they contain a vast and detailed amount of Melee-specific physics calculations
+and state information that would be difficult to discover on your own.
+"""
 
 import csv
 import math
@@ -11,8 +16,11 @@ from melee.enums import Action, AttackState, Character
 
 class FrameData:
     """Set of helper functions and data structures for knowing Melee frame data
-    The frame data in libmelee is written to be useful to bots, and behave in a sane way,
-    not necessarily be binary-compatible with in-game structures or values."""
+
+    Note:
+        The frame data in libmelee is written to be useful to bots, and behave in a sane way,
+        not necessarily be binary-compatible with in-game structures or values.
+    """
 
     def __init__(self, write=False):
         if write:
@@ -104,9 +112,12 @@ class FrameData:
                     line[key] = float(value)
                 self.characterdata[Character(line["CharacterIndex"])] = line
 
-    # Returns boolean on if the given action is a roll
     def is_grab(self, character, action):
         """For the given character, is the supplied action a grab?
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
 
         This includes command grabs, such as Bowser's claw. Not just Z-grabs."""
         if action in [Action.GRAB, Action.GRAB_RUNNING]:
@@ -133,13 +144,17 @@ class FrameData:
 
         return False
 
-    # Returns boolean on if the given action is a roll
     def is_roll(self, character, action):
         """For a given character, is the supplied action a roll?
 
         Libmelee has a liberal definition of 'roll'. A roll is essentially a move that:
             1) Has no hitbox
             2) Is inactionable
+        Spot dodge and (most) taunts for example are considered 'rolls' to this function
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
 
         Some examples of this are SPOTDODGE (Which is basically just a 0-length roll) and taunts.
         """
@@ -185,6 +200,10 @@ class FrameData:
         """For a given character, is the supplied action a 'B-Move'
 
         B-Moves tend to be weird, so it's useful to know if this is a thing that warrants a special case
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
         """
         # If we're missing it, don't call it a B move
         if action == Action.UNKNOWN_ANIMATION:
@@ -216,6 +235,10 @@ class FrameData:
         """For a given character, is the supplied action an attack?
 
         It is an attack if it has a hitbox at any point in the action. Not necessarily right now.
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
         """
         # For each frame...
         for _, frame in self.framedata[character][action].items():
@@ -231,7 +254,11 @@ class FrameData:
         return False
 
     def is_shield(self, action):
-        """Is the given action a Shielding action?"""
+        """Is the given action a Shielding action?
+
+        Args:
+            action (enums.Action): The action we're interested in
+        """
         return action in [
             Action.SHIELD,
             Action.SHIELD_START,
@@ -243,7 +270,12 @@ class FrameData:
     def max_jumps(self, character):
         """Returns the number of double-jumps the given character has.
 
-        NOTE: This means in general, not according to the current gamestate"""
+        Args:
+            character (enums.Character): The character we're interested in
+
+        Note:
+            This means in general, not according to the current gamestate
+        """
         if character == Character.JIGGLYPUFF:
             return 5
         if character == Character.KIRBY:
@@ -255,32 +287,39 @@ class FrameData:
     #    ATTACKING
     #    COOLDOWN
     #    NOT_ATTACKING
-    def attack_state(self, player):
-        """For the given player, returns their current attack state as an AttackState enum"""
-        if not self.is_attack(player.character, player.action):
+    def attack_state(self, character, action, action_frame):
+        """For the given player, returns their current attack state as an AttackState enum
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
+            action_frame (int): The frame of the action we're interested in
+        """
+        if not self.is_attack(character, action):
             return AttackState.NOT_ATTACKING
 
-        if player.action_frame < self.first_hitbox_frame(
-            player.character, player.action
-        ):
+        if action_frame < self.first_hitbox_frame(character, action):
             return AttackState.WINDUP
 
-        if player.action_frame > self.last_hitbox_frame(
-            player.character, player.action
-        ):
+        if action_frame > self.last_hitbox_frame(character, action):
             return AttackState.COOLDOWN
 
         return AttackState.ATTACKING
 
-    def range_forward(self, character, action, frame):
-        """
-        Returns the maximum remaining range of the given attack, in the forward direction
+    def range_forward(self, character, action, action_frame):
+        """Returns the maximum remaining range of the given attack, in the forward direction
             (relative to how the character starts facing)
-            Range "remaining" means that it won't consider hitboxes that we've already passed.
+
+        Range "remaining" means that it won't consider hitboxes that we've already passed.
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
+            action_frame (int): The frame of the action we're interested in
         """
         attackrange = 0
         lastframe = self.last_hitbox_frame(character, action)
-        for i in range(frame + 1, lastframe + 1):
+        for i in range(action_frame + 1, lastframe + 1):
             attackingframe = self._getframe(character, action, i)
             if attackingframe is None:
                 continue
@@ -307,15 +346,20 @@ class FrameData:
                 )
         return attackrange
 
-    def range_backward(self, character, action, frame):
-        """
-        Returns the maximum remaining range of the given attack, in the backwards direction
+    def range_backward(self, character, action, action_frame):
+        """Returns the maximum remaining range of the given attack, in the backwards direction
         (relative to how the character starts facing)
+
         Range "remaining" means that it won't consider hitboxes that we've already passed.
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
+            action_frame (int): The frame of the action we're interested in
         """
         attackrange = 0
         lastframe = self.last_hitbox_frame(character, action)
-        for i in range(frame + 1, lastframe + 1):
+        for i in range(action_frame + 1, lastframe + 1):
             attackingframe = self._getframe(character, action, i)
             if attackingframe is None:
                 continue
@@ -345,6 +389,11 @@ class FrameData:
     def in_range(self, attacker, defender, stage):
         """Calculates if an attack is in range of a given defender
 
+        Args:
+            attacker (gamestate.PlayerState): The attacking player
+            defender (gamestate.PlayerState): The defending player
+            stage (enums.Stage): The stage being played on
+
         Returns:
             integer with the frame that the specified attack will hit the defender
             0 if it won't hit
@@ -353,7 +402,6 @@ class FrameData:
             This considers the defending character to have a single hurtbox, centered
             at the x,y coordinates of the player (adjusted up a little to be centered)
         """
-
         lastframe = self.last_hitbox_frame(attacker.character, attacker.action)
 
         # Adjust the defender's hurtbox up a little, to be more centered.
@@ -475,9 +523,11 @@ class FrameData:
         return 0
 
     def dj_height(self, character_state):
-        """
-        Returns the height the character's double jump will take them.
+        """Returns the height the character's double jump will take them.
         If character is in jump already, returns how heigh that one goes
+
+        Args:
+            character_state (gamestate.PlayerState): The player we're calculating for
         """
         # Peach's DJ doesn't follow normal physics rules. Hardcoded it
         if character_state.character == Character.PEACH:
@@ -514,10 +564,12 @@ class FrameData:
         return distance
 
     def frames_until_dj_apex(self, character_state):
-        """
-        Return the number of frames it takes for the character to reach the apex of
+        """Return the number of frames it takes for the character to reach the apex of
         their double jump. If they haven't used it yet, then calculate it as if they
         jumped right now.
+
+        Args:
+            character_state (gamestate.PlayerState): The player we're calculating for
         """
         # Peach's DJ doesn't follow normal physics rules. Hardcoded it
         # She can float-cancel, so she can be falling at any time during the jump
@@ -555,7 +607,12 @@ class FrameData:
 
     def last_roll_frame(self, character, action):
         """Returns the last frame of the roll
-        -1 if not a roll"""
+         -1 if not a roll
+
+        Args:
+            character_state (gamestate.PlayerState): The player we're calculating for
+            action (enums.Action): The action the character is in
+        """
         if not self.is_roll(character, action):
             return -1
         frames = []
@@ -566,7 +623,12 @@ class FrameData:
         return max(frames)
 
     def roll_end_position(self, character_state, stage):
-        """Returns the x coordinate that the current roll will end in"""
+        """Returns the x coordinate that the current roll will end in
+
+        Args:
+            character_state (gamestate.PlayerState): The player we're calculating for
+            stage (enums.Stage): The stage being played on
+        """
         distance = 0
         try:
             # TODO: Take current momentum into account
@@ -612,7 +674,12 @@ class FrameData:
 
     def first_hitbox_frame(self, character, action):
         """Returns the first frame that a hitbox appears for a given action
-        returns -1 if no hitboxes (not an attack action)"""
+           returns -1 if no hitboxes (not an attack action)
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
+        """
         # Grab only the subset that have a hitbox
         hitboxes = []
         for action_frame, frame in self.framedata[character][action].items():
@@ -633,9 +700,14 @@ class FrameData:
     def hitbox_count(self, character, action):
         """Returns the number of hitboxes an attack has
 
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
+
         Note:
-            By this we mean is it a multihit attack? (Peach's down B?)
-            or a single-hit attack? (Marth's fsmash?)"""
+           By this we mean is it a multihit attack? (Peach's down B?)
+           or a single-hit attack? (Marth's fsmash?)
+        """
         # Grab only the subset that have a hitbox
 
         # This math doesn't work for Samus's UP_B
@@ -672,7 +744,13 @@ class FrameData:
 
     def iasa(self, character, action):
         """Returns the first frame of an attack that the character is interruptible (actionable)
-        returns -1 if not an attack"""
+
+        returns -1 if not an attack
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
+        """
         if not self.is_attack(character, action):
             return -1
         iasaframes = []
@@ -689,7 +767,14 @@ class FrameData:
 
     def last_hitbox_frame(self, character, action):
         """Returns the last frame that a hitbox appears for a given action
-        returns -1 if no hitboxes (not an attack action)"""
+
+        returns -1 if no hitboxes (not an attack action)
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
+
+        """
         # Grab only the subset that have a hitbox
         hitboxes = []
         for action_frame, frame in self.framedata[character][action].items():
@@ -708,7 +793,12 @@ class FrameData:
         return max(hitboxes)
 
     def frame_count(self, character, action):
-        """Returns the count of total frames in the given action."""
+        """Returns the count of total frames in the given action.
+
+        Args:
+            character (enums.Character): The character we're interested in
+            action (enums.Action): The action we're interested in
+        """
         frames = []
         for action_frame, _ in self.framedata[character][action].items():
             frames.append(action_frame)
@@ -958,11 +1048,12 @@ class FrameData:
         self.actionfile.close()
 
     def slide_distance(self, character_state, initspeed, frames):
-        """
-        How far will a character slide, given:
-        character: An enum value of the sliding character
-        initspeed: The initial speed of the character
-        frames: How many frames we want to calculate for
+        """How far a character will slide in the given number of frames
+
+        Args:
+            character_state (gamestate.PlayerState): The player we're interested in
+            initspeed (float): The character's starting speed
+            frames (int): Maximum number of frames to calculate for
         """
         normalfriction = self.characterdata[character_state.character]["Friction"]
         friction = normalfriction

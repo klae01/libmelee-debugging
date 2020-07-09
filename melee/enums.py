@@ -1,4 +1,4 @@
-""" Enum values for various Melee objects """
+"""Enum values for various Melee objects """
 
 from enum import Enum
 
@@ -17,7 +17,7 @@ class Stage(Enum):
 
 
 class Menu(Enum):
-    """A scene the game can be in"""
+    """A primary menu scene the game can be in"""
 
     CHARACTER_SELECT = 0
     STAGE_SELECT = 1
@@ -63,7 +63,10 @@ class ControllerStatus(Enum):
 
 
 class ControllerType(Enum):
-    """Types a controller can be in the Dolphin config"""
+    """Types a controller can be in the Dolphin config
+
+    Named pipe input is considered 'standard' input by Dolphin.
+    """
 
     STANDARD = "6"
     GCN_ADAPTER = "12"
@@ -81,7 +84,9 @@ class AttackState(Enum):
 
 class Character(Enum):
     """A Melee character ID.
-    NOTE: Numeric values are 'internal' IDs."""
+
+    Note:
+        Numeric values are 'internal' IDs."""
 
     MARIO = 0x00
     FOX = 0x01
@@ -118,7 +123,10 @@ class Character(Enum):
 
 
 def to_internal(char_id):
-    """Converts a character select-screen ID to an 'internal ID' enum"""
+    """Converts a character select-screen ID to an 'internal ID' enum
+
+    Mostly used at the Character Select Screen
+    """
     if char_id == 0x00:
         return Character.DOC
     if char_id == 0x01:
@@ -174,7 +182,9 @@ def to_internal(char_id):
 
 class Button(Enum):
     """A single button on a GCN controller
-    NOTE: String values represent the Dolphin input string for that button"""
+
+    Note:
+        String values represent the Dolphin input string for that button"""
 
     BUTTON_A = "A"
     BUTTON_B = "B"
@@ -195,7 +205,9 @@ class Button(Enum):
 
 class Action(Enum):
     """The in-game action (or animation) a character can be in
-    NOTE: Numeric values represent their Slippi-defined in-game values"""
+
+    Note:
+        Numeric values (mostly) represent their in-game values"""
 
     DEAD_DOWN = 0x0
     DEAD_LEFT = 0x1

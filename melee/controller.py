@@ -20,6 +20,7 @@ class ControllerState:
 
     def __init__(self):
         self.button = dict()
+        """(dict of enums.Button to bool): For the each Button as key, tells you if the button is pressed."""
         # Boolean buttons
         self.button[enums.Button.BUTTON_A] = False
         self.button[enums.Button.BUTTON_B] = False
@@ -35,13 +36,17 @@ class ControllerState:
         self.button[enums.Button.BUTTON_D_RIGHT] = False
         # Analog sticks
         self.main_stick = (0.5, 0.5)
+        """(pair of floats): The main stick's x,y position. Ranges from 0->1, 0.5 is neutral"""
         self.c_stick = (0.5, 0.5)
+        """(pair of floats): The C stick's x,y position. Ranges from 0->1, 0.5 is neutral"""
         # Analog shoulders
         self.l_shoulder = 0
+        """(float): L shoulder analog press. Ranges from 0 (not pressed) to 1 (fully pressed)"""
         self.r_shoulder = 0
+        """(float): R shoulder analog press. Ranges from 0 (not pressed) to 1 (fully pressed)"""
 
-    def to_bytes(self):
-        """Serialize the controller state into an 8 byte sequence that the Gamecube uses"""
+    def _to_bytes(self):
+        """Serialize the controller state into an 8 byte sequence that the TAStm32 uses"""
         buttons_total = 0x0080
         if self.button[enums.Button.BUTTON_A]:
             buttons_total += 0x0100
@@ -91,9 +96,19 @@ class ControllerState:
 
 
 class Controller:
-    """Utility class that manages virtual controller state and button presses"""
+    """Manages virtual controller state and button presses
+
+    The Controller object is your primary input mechanism for a bot. It's used for pressing
+    buttons programatically, but also automatically configuring the controller with dolphin
+    """
 
     def __init__(self, console, port, serial_device="/dev/ttyACM0"):
+        """Create a new virtual controller
+
+        Args:
+            console (melee.Console): A console object to attach the controller to
+            port (int): Which controller port to plug into. Must be 1-4.
+        """
         self._is_dolphin = console.is_dolphin
         if self._is_dolphin:
             self.pipe_path = console.get_dolphin_pipes_path(port)
@@ -116,7 +131,9 @@ class Controller:
 
     def connect(self):
         """Connect the controller to the console
-        NOTE: Blocks until the other side is ready
+
+        Note:
+            Blocks until the other side is ready
         """
         if self._is_dolphin:
             if platform.system() == "Windows":
@@ -207,6 +224,9 @@ class Controller:
         """Press a single button
 
         If already pressed, this has no effect
+
+        Args:
+            button (enums.Button): Button to press
         """
         self.current.button[button] = True
         if self._is_dolphin:
@@ -218,9 +238,12 @@ class Controller:
             self._write(command)
 
     def release_button(self, button):
-        """Unpress a single button
+        """Release a single button
 
         If already released, this has no effect
+
+        Args:
+            button (enums.Button): Button to release
         """
         self.current.button[button] = False
         if self._is_dolphin:
@@ -234,10 +257,12 @@ class Controller:
     def press_shoulder(self, button, amount):
         """Press the analog shoulder buttons to a given amount
 
-        button - Button enum. Has to be L or R
-        amount - Float between 0 (not pressed at all) and 1 (Fully pressed in)
+        Args:
+            button (enums.Button): Has to be L or R
+            amount (float): Ranges from 0 (not pressed at all) and 1 (Fully pressed in)
 
-        Note that the 'digital' button press of L or R are handled separately
+        Note:
+            The 'digital' button press of L or R are handled separately
             as normal button presses. Pressing the shoulder all the way in
             will not cause the digital button to press
         """
@@ -256,9 +281,10 @@ class Controller:
     def tilt_analog(self, button, x, y):
         """Tilt one of the analog sticks to a given (x,y) value
 
-        button - Button enum. Must be main stick or C stick
-        x - Float between 0 (left) and 1 (right)
-        y - Float between 0 (down) and 1 (up)
+        Args:
+            button (enums.Button): Must be main stick or C stick
+            x (float): Ranges between 0 (left) and 1 (right)
+            y (float): Ranges between 0 (down) and 1 (up)
         """
         if button == enums.Button.BUTTON_MAIN:
             self.current.main_stick = (x, y)
@@ -273,9 +299,9 @@ class Controller:
             self._write(command)
 
     def empty_input(self):
-        """Helper function to reset the controller to a resting state
+        """Resets the controller to a resting state
 
-        All buttons are released, all sticks set to 0.5
+        All buttons are released, all sticks set to 0.5, all shoulders set to 0
         """
         # Set the internal state back to neutral
         self.current.button[enums.Button.BUTTON_A] = False
@@ -342,7 +368,7 @@ class Controller:
         else:
             # Command for "send single controller poll" is 'A'
             # Serialize controller state into bytes and send
-            self.tastm32.write(b"A" + self.current.to_bytes())
+            self.tastm32.write(b"A" + self.current._to_bytes())
             cmd = self.tastm32.read(1)
 
             if cmd != b"A":
