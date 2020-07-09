@@ -63,9 +63,7 @@ class MenuHelper:
         # If we're at the stage select screen, choose a stage
         elif gamestate.menu_state == enums.Menu.STAGE_SELECT:
             MenuHelper.choose_stage(
-                stage=enums.Stage.POKEMON_STADIUM,
-                gamestate=gamestate,
-                controller=controller,
+                stage=stage_selected, gamestate=gamestate, controller=controller
             )
         elif gamestate.menu_state == enums.Menu.MAIN_MENU:
             if connect_code:
