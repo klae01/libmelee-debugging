@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class Logger:
-    """A custom logger for a console. Writes the gametstate out to a CSV file
+    """A custom logger for a console. Writes the gametstate out to a CSV file each frame
     so you can retroactively view the game frame-by-frame"""
 
     def __init__(self):
@@ -51,7 +51,11 @@ class Logger:
     def log(self, column, contents, concat=False):
         """Write 'contents' to the log at given 'column'
 
-        Replaces the contents if concat=False
+        Args:
+            column (str): The column to write the log message at
+            contents (str): The thing to write to the log
+            concat (bool): Should we concatenate the contents to the existing log at that column
+                (or replace it)
         """
         # Should subsequent logs be cumulative?
         if concat:
@@ -63,7 +67,11 @@ class Logger:
             self.current_row[column] = contents
 
     def logframe(self, gamestate):
-        """Log any common per-frame things"""
+        """Log any common per-frame things
+
+        Args:
+            gamestate (gamestate.GameState): A gamestate object to log
+        """
         ai_state = gamestate.ai_state
         opponent_state = gamestate.opponent_state
 
