@@ -25,15 +25,15 @@ from melee.slippstream import CommType, EventType, SlippstreamClient
 class Console:
     """The console object that represents your Dolphin / Wii / SLP file"""
 
-    def __init__(self, path=None, slippi_address="", logger=None):
+    def __init__(self, path=None, slippi_address="127.0.0.1", logger=None):
         """Create a Console object
 
         Args:
-            is_dolphin (boolean): Is this console a dolphin?
             path (str): Path to the directory where your dolphin executable is
                 located. (if applicable) None tells console to use the installed copy of the emulator
             slippi_address (str): IP address of the Dolphin / Wii to connect to.
                 Empty string will try to autodiscover a nearby SlippiComm server
+            logger (logger.Logger): Logger instance to use. None for no logger.
         """
         self.logger = logger
         self.is_dolphin = path is not None
