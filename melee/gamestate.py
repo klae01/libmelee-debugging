@@ -2,6 +2,7 @@
         to make gameplay decisions
 """
 
+import melee
 from melee import enums
 from melee.enums import Action, Character
 
@@ -102,6 +103,8 @@ class PlayerState:
         self.iasa = 0
         self.moonwalkwarning = False
         """(bool): Helper variable to tell you that if you dash back right now, it'll moon walk"""
+        self.controller_state = melee.controller.ControllerState()
+        """(controller.ControllerState): What buttons were pressed for this character"""
         self.hitbox_1_size = 0
         self.hitbox_2_size = 0
         self.hitbox_3_size = 0
