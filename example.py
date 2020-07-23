@@ -37,9 +37,6 @@ parser.add_argument(
     default=1,
 )
 parser.add_argument(
-    "--live", "-l", help="The opponent is playing live with a GCN Adapter", default=True
-)
-parser.add_argument(
     "--debug",
     "-d",
     action="store_true",
@@ -73,27 +70,18 @@ args = parser.parse_args()
 #   You can write things to it each frame, and it will create a CSV file describing the match
 log = None
 if args.debug:
-    log = melee.logger.Logger()
+    log = melee.Logger()
 
 # This frame data object contains lots of helper functions and values for looking up
 #   various Melee stats, hitboxes, and physics calculations
-framedata = melee.framedata.FrameData(args.framerecord)
-
-# Options here are:
-#   "Standard" input is what dolphin calls the type of input that we use
-#       for named pipe (bot) input
-#   GCN_ADAPTER will use your WiiU adapter for live human-controlled play
-#   UNPLUGGED is pretty obvious what it means
-opponent_type = melee.enums.ControllerType.UNPLUGGED
-if args.live:
-    opponent_type = melee.enums.ControllerType.GCN_ADAPTER
+framedata = melee.FrameData(args.framerecord)
 
 # Create our Console object.
 #   This will be one of the primary objects that we will interface with.
 #   The Console represents the virtual or hardware system Melee is playing on.
 #   Through this object, we can get "GameState" objects per-frame so that your
 #       bot can actually "see" what's happening in the game
-console = melee.console.Console(
+console = melee.Console(
     path=args.dolphin_executable_path, slippi_address=args.address, logger=log
 )
 
@@ -105,12 +93,12 @@ console.render = True
 #   The controller is the second primary object your bot will interact with
 #   Your controller is your way of sending button presses to the game, whether
 #   virtual or physical.
-controller = melee.controller.Controller(
-    console=console, port=args.port, type=melee.enums.ControllerType.STANDARD
+controller = melee.Controller(
+    console=console, port=args.port, type=melee.ControllerType.STANDARD
 )
 
-controller_opponent = melee.controller.Controller(
-    console=console, port=args.opponent, type=opponent_type
+controller_opponent = melee.Controller(
+    console=console, port=args.opponent, type=melee.ControllerType.GCN_ADAPTER
 )
 
 
@@ -170,16 +158,13 @@ while True:
         )
 
     # What menu are we in?
-    if gamestate.menu_state in [
-        melee.enums.Menu.IN_GAME,
-        melee.enums.Menu.SUDDEN_DEATH,
-    ]:
+    if gamestate.menu_state in [melee.Menu.IN_GAME, melee.Menu.SUDDEN_DEATH]:
 
         # Slippi Online matches assign you a random port once you're in game that's different
         #   than the one you're physically plugged into. This helper will autodiscover what
         #   port we actually are.
         discovered_port = melee.gamestate.port_detector(
-            gamestate, controller, melee.enums.Character.FOX
+            gamestate, controller, melee.Character.FOX
         )
 
         if discovered_port > 0:
@@ -198,12 +183,12 @@ while True:
                 )
 
     else:
-        melee.menuhelper.MenuHelper.menu_helper_simple(
+        melee.MenuHelper.menu_helper_simple(
             gamestate,
             controller,
             args.port,
-            melee.enums.Character.FOX,
-            melee.enums.Stage.POKEMON_STADIUM,
+            melee.Character.FOX,
+            melee.Stage.POKEMON_STADIUM,
             args.connect_code,
             autostart=True,
             swag=True,
