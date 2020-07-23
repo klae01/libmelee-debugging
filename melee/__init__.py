@@ -5,10 +5,10 @@ Works on Linux/OSX/Windows
 
 import melee.version
 from melee import framedata, menuhelper, stages, techskill
-from melee.console import Console
-from melee.controller import Controller, ControllerState
+from melee.console import *
+from melee.controller import *
 from melee.enums import *
-from melee.framedata import FrameData
-from melee.gamestate import GameState
-from melee.logger import Logger
-from melee.menuhelper import MenuHelper
+from melee.framedata import *
+from melee.gamestate import *
+from melee.logger import *
+from melee.menuhelper import *
