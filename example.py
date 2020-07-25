@@ -2,7 +2,6 @@
 import argparse
 import signal
 import sys
-import time
 
 import melee
 
@@ -50,7 +49,9 @@ parser.add_argument(
     help="(DEVELOPMENT ONLY) Records frame data from the match,"
     "stores into framedata.csv.",
 )
-parser.add_argument("--address", "-a", default="", help="IP address of Slippi/Wii")
+parser.add_argument(
+    "--address", "-a", default="127.0.0.1", help="IP address of Slippi/Wii"
+)
 parser.add_argument(
     "--dolphin_executable_path",
     "-e",
@@ -119,9 +120,6 @@ signal.signal(signal.SIGINT, signal_handler)
 
 # Run the console
 console.run()
-
-# Give the console a second to actually spin up
-time.sleep(2)
 
 # Connect to the console
 print("Connecting to console...")
