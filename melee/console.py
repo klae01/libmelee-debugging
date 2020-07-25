@@ -404,7 +404,7 @@ class Console:
                 gamestate.player[controller_port].percent = int(
                     unpack(">f", event_bytes[0x16 : 0x16 + 4])[0]
                 )
-                gamestate.player[controller_port].shield = unpack(
+                gamestate.player[controller_port].shield_strength = unpack(
                     ">f", event_bytes[0x1A : 0x1A + 4]
                 )[0]
                 gamestate.player[controller_port].stock = unpack(
