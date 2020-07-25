@@ -114,6 +114,8 @@ class Controller:
                 return True
             else:
                 return True
+        else:
+            return True
 
     def disconnect(self):
         """Disconnects the controller from the console"""
