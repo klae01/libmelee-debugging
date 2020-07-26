@@ -6,7 +6,8 @@ setup(
     install_requires=[
         "pyenet",
         "serial",
-        "py-ubjson" 'pywin32; platform_system=="Windows"',
+        "py-ubjson",
+        'pywin32; platform_system=="Windows"',
     ],
     version="0.8.0",
     description="Open API written in Python 3 for making your own Smash Bros: Melee AI that works with Slippi Online",
