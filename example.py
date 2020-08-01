@@ -83,7 +83,10 @@ framedata = melee.FrameData(args.framerecord)
 #   Through this object, we can get "GameState" objects per-frame so that your
 #       bot can actually "see" what's happening in the game
 console = melee.Console(
-    path=args.dolphin_executable_path, slippi_address=args.address, logger=log
+    path=args.dolphin_executable_path,
+    slippi_address=args.address,
+    slippi_port=51441,
+    logger=log,
 )
 
 # Dolphin has an optional mode to not render the game's visuals
