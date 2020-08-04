@@ -3,11 +3,13 @@
 import copy
 import platform
 import sys
+import time
 from struct import pack
 
 import serial
 
 try:
+    import pywintypes
     import win32file
 except ImportError:
     pass
@@ -98,17 +100,24 @@ class Controller:
 
             if self._is_dolphin:
                 if platform.system() == "Windows":
-                    # "Create File" in windows is what you use to open a file. Not
-                    #   create one. Because the windows API is stupid.
-                    self.pipe = win32file.CreateFile(
-                        self.pipe_path,
-                        win32file.GENERIC_WRITE,
-                        0,
-                        None,
-                        win32file.OPEN_EXISTING,
-                        0,
-                        None,
-                    )
+                    # Windows can take a little while to actually make the pipes
+                    #   So keep trying a few times to connect to it
+                    for _ in range(5):
+                        try:
+                            # "Create File" in windows is what you use to open a file. Not
+                            #   create one. Because the windows API is stupid.
+                            self.pipe = win32file.CreateFile(
+                                self.pipe_path,
+                                win32file.GENERIC_WRITE,
+                                0,
+                                None,
+                                win32file.OPEN_EXISTING,
+                                0,
+                                None,
+                            )
+                            return True
+                        except pywintypes.error:
+                            time.sleep(1)
                 else:
                     self.pipe = open(self.pipe_path, "w")
                 return True
@@ -285,7 +294,10 @@ class Controller:
     def _write(self, command):
         """Platform independent button write function."""
         if platform.system() == "Windows":
-            win32file.WriteFile(self.pipe, command.encode())
+            try:
+                win32file.WriteFile(self.pipe, command.encode())
+            except pywintypes.error:
+                pass
         else:
             self.pipe.write(command)
 
