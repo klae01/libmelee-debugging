@@ -470,6 +470,8 @@ class MenuHelper:
                     controller.tilt_analog(enums.Button.BUTTON_MAIN, 0.5, 0)
             else:
                 controller.press_button(enums.Button.BUTTON_B)
+        elif gamestate.menu_state == enums.Menu.PRESS_START:
+            controller.press_button(enums.Button.BUTTON_START)
         else:
             controller.empty_input()
 
@@ -503,5 +505,7 @@ class MenuHelper:
                 pass
             else:
                 controller.press_button(enums.Button.BUTTON_B)
+        elif gamestate.menu_state == enums.Menu.PRESS_START:
+            controller.press_button(enums.Button.BUTTON_START)
         else:
             controller.empty_input()
