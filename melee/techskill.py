@@ -17,7 +17,7 @@ def multishine(ai_state, controller):
             controller.press_button(enums.Button.BUTTON_B)
             controller.tilt_analog(enums.Button.BUTTON_MAIN, 0.5, 0)
             return
-        controller.empty_input()
+        controller.release_all()
         return
 
     shine_start = (
@@ -34,7 +34,7 @@ def multishine(ai_state, controller):
         controller.press_button(enums.Button.BUTTON_Y)
         return
 
-    controller.empty_input()
+    controller.release_all()
 
 
 def upsmashes(ai_state, controller):
@@ -43,4 +43,4 @@ def upsmashes(ai_state, controller):
         controller.tilt_analog(enums.Button.BUTTON_C, 0.5, 1)
         return
 
-    controller.empty_input()
+    controller.release_all()

@@ -102,7 +102,7 @@ class MenuHelper:
 
         # Let the controller go every other frame. Makes the logic below easier
         if gamestate.frame % 2 == 0:
-            controller.empty_input()
+            controller.release_all()
             return index
 
         if len(connect_code) == index:
@@ -265,7 +265,7 @@ class MenuHelper:
                 controller.press_button(enums.Button.BUTTON_START)
                 return
             else:
-                controller.empty_input()
+                controller.release_all()
                 return
 
         # release start in addition to anything else
@@ -321,7 +321,7 @@ class MenuHelper:
             if cursor_x > target_x + wiggleroom:
                 controller.tilt_analog(enums.Button.BUTTON_MAIN, 0, 0.5)
                 return
-        controller.empty_input()
+        controller.release_all()
 
     def choose_stage(stage, gamestate, controller):
         """Choose a stage from the stage select menu
@@ -334,7 +334,7 @@ class MenuHelper:
             controller (controller.Controller): The controller object to press
         """
         if gamestate.frame < 20:
-            controller.empty_input()
+            controller.release_all()
             return
         target_x, target_y = 0, 0
         if stage == enums.Stage.BATTLEFIELD:
@@ -418,7 +418,7 @@ class MenuHelper:
             gamestate.player[targetport].controller_status == status
             and correctcharacter
         ):
-            controller.empty_input()
+            controller.release_all()
             return
 
         # Move up if we're too low
@@ -454,7 +454,7 @@ class MenuHelper:
         """
         # Let the controller go every other frame. Makes the logic below easier
         if gamestate.frame % 2 == 0:
-            controller.empty_input()
+            controller.release_all()
             return
 
         if gamestate.menu_state == enums.Menu.MAIN_MENU:
@@ -473,7 +473,7 @@ class MenuHelper:
         elif gamestate.menu_state == enums.Menu.PRESS_START:
             controller.press_button(enums.Button.BUTTON_START)
         else:
-            controller.empty_input()
+            controller.release_all()
 
     def choose_direct_online(gamestate, controller):
         """Helper function to bring us into the direct connect online menu
@@ -484,7 +484,7 @@ class MenuHelper:
         """
         # Let the controller go every other frame. Makes the logic below easier
         if gamestate.frame % 2 == 0:
-            controller.empty_input()
+            controller.release_all()
             return
 
         if gamestate.menu_state == enums.Menu.MAIN_MENU:
@@ -508,4 +508,4 @@ class MenuHelper:
         elif gamestate.menu_state == enums.Menu.PRESS_START:
             controller.press_button(enums.Button.BUTTON_START)
         else:
-            controller.empty_input()
+            controller.release_all()
