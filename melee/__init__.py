@@ -12,3 +12,4 @@ from melee.framedata import *
 from melee.gamestate import *
 from melee.logger import *
 from melee.menuhelper import *
+from melee.stages import *
