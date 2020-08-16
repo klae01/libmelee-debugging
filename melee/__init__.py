@@ -3,7 +3,6 @@ Python3 only
 Works on Linux/OSX/Windows
 """
 
-import melee.version
 from melee import framedata, menuhelper, stages, techskill
 from melee.console import *
 from melee.controller import *
@@ -13,3 +12,4 @@ from melee.gamestate import *
 from melee.logger import *
 from melee.menuhelper import *
 from melee.stages import *
+from melee.version import *
