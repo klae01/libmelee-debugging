@@ -42,6 +42,7 @@ class Console:
         online_delay=2,
         blocking_input=False,
         polling_mode=False,
+        allow_old_version=False,
         logger=None,
     ):
         """Create a Console object
@@ -58,6 +59,9 @@ class Console:
             polling_mode (bool): Polls input to console rather than blocking for it
                 When set, step() will always return immediately, but may be None if no
                 gamestate is available yet.
+            allow_old_version (bool): Allow SLP versions older than 3.0.0 (rollback era)
+                Only enable if you know what you're doing. You probably don't want this.
+                Gamestates will be missing key information, come in really late, or possibly not work at all
             logger (logger.Logger): Logger instance to use. None for no logger.
         """
         self.logger = logger
@@ -84,6 +88,7 @@ class Console:
         self._polling_mode = polling_mode
         self.slp_version = "unknown"
         """(str): The SLP version this stream/file currently is."""
+        self._allow_old_version = allow_old_version
 
         # Keep a running copy of the last gamestate produced
         self._prev_gamestate = GameState()
@@ -303,6 +308,8 @@ class Console:
                             base64.b64decode(message["payload"]), self._temp_gamestate
                         )
                         frame_ended = True
+                elif message["type"] == "frame_end":
+                    frame_ended = True
             else:
                 return None
 
@@ -348,7 +355,7 @@ class Console:
                 minor = unpack(">B", event_bytes[0x02 : 0x02 + 1])[0]
                 version = unpack(">B", event_bytes[0x03 : 0x03 + 1])[0]
                 self.slp_version = str(major) + "." + str(minor) + "." + str(version)
-                if major < 3:
+                if major < 3 and not self._allow_old_version:
                     raise SlippiVersionTooLow(self.slp_version)
                 try:
                     self._current_stage = enums.to_internal_stage(
@@ -476,9 +483,13 @@ class Console:
                 gamestate.player[controller_port].jumps_left = unpack(
                     ">B", event_bytes[0x32 : 0x32 + 1]
                 )[0]
-                gamestate.player[controller_port].invulnerable = (
-                    int(unpack(">B", event_bytes[0x34 : 0x34 + 1])[0]) != 0
-                )
+
+                try:
+                    gamestate.player[controller_port].invulnerable = (
+                        int(unpack(">B", event_bytes[0x34 : 0x34 + 1])[0]) != 0
+                    )
+                except error:
+                    gamestate.player[controller_port].invulnerable = False
 
                 try:
                     gamestate.player[controller_port].speed_air_x_self = unpack(
