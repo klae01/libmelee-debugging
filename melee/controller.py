@@ -4,7 +4,6 @@ import copy
 import platform
 import sys
 import time
-from struct import pack
 
 import serial
 
@@ -21,6 +20,7 @@ class ControllerState:
     """A snapshot of the state of a virtual controller"""
 
     def __init__(self):
+        __slots__ = ("button", "main_stick", "c_stick", "l_shoulder", "r_shoulder")
         self.button = dict()
         """(dict of enums.Button to bool): For the each Button as key, tells you if the button is pressed."""
         # Boolean buttons

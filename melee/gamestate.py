@@ -21,6 +21,7 @@ class GameState(object):
         "stage_select_cursor_y",
         "ready_to_start",
         "distance",
+        "menu_selection",
         "_newframe",
     )
 
@@ -45,14 +46,8 @@ class GameState(object):
         """(bool): Is the 'ready to start' banner showing at the character select screen?"""
         self.distance = 0.0
         """(float): Euclidian distance between the two players. (or closest one for climbers)"""
-        self.player[1] = None
-        self.player[2] = None
-        self.player[3] = None
-        self.player[4] = None
-        self.player[5] = None
-        self.player[6] = None
-        self.player[7] = None
-        self.player[8] = None
+        self.menu_selection = 0
+        """(int): The index of the selected menu item for when in menus."""
         self._newframe = True
 
 
