@@ -242,9 +242,10 @@ class MenuHelper:
             else:
                 y = 0.5 - (y / 2)
             controller.tilt_analog(enums.Button.BUTTON_MAIN, x, y)
+            return
 
-            if isSlippiCSS:
-                controller.press_button(enums.Button.BUTTON_START)
+        if character_selected == character and swag and isSlippiCSS:
+            controller.press_button(enums.Button.BUTTON_START)
             return
 
         # We want to get to a state where the cursor is NOT over the character,
@@ -490,10 +491,11 @@ class MenuHelper:
         if gamestate.frame % 2 == 0:
             controller.release_all()
             return
-
         if gamestate.menu_state == enums.Menu.MAIN_MENU:
             if gamestate.submenu == enums.SubMenu.ONLINE_PLAY_SUBMENU:
                 if gamestate.menu_selection == 2:
+                    controller.press_button(enums.Button.BUTTON_A)
+                elif gamestate.menu_selection == 3:
                     controller.press_button(enums.Button.BUTTON_A)
                 else:
                     controller.tilt_analog(enums.Button.BUTTON_MAIN, 0.5, 0)
