@@ -56,7 +56,7 @@ parser.add_argument(
     "--dolphin_executable_path",
     "-e",
     default=None,
-    help="Manually specify the non-installed directory where dolphin is",
+    help="The directory where dolphin is",
 )
 parser.add_argument(
     "--connect_code",
