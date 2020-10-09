@@ -500,6 +500,8 @@ class Console:
             )
         except TypeError:
             playerstate.hitstun_frames_left = 0
+        except ValueError:
+            playerstate.hitstun_frames_left = 0
         try:
             playerstate.on_ground = not bool(
                 np.ndarray((1,), ">B", event_bytes, 0x2F)[0]
