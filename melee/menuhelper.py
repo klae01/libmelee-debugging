@@ -20,6 +20,7 @@ class MenuHelper:
         character_selected,
         stage_selected,
         connect_code,
+        costume=0,
         autostart=False,
         swag=True,
     ):
@@ -34,6 +35,7 @@ class MenuHelper:
             character_selected (enums.Character): The character your bot will play as
             stage_selected (enums.Stage): The stage your bot will choose to play on
             connect_code (str): The connect code to direct match with. Leave blank for VS mode.
+            costume (int): Costume index chosen
             autostart (bool): Automatically start the game when it's ready.
                 Useful for BotvBot matches where no human is there to start it.
             swag (bool): What it sounds like
@@ -57,6 +59,7 @@ class MenuHelper:
                     gamestate=gamestate,
                     port=port,
                     controller=controller,
+                    costume=costume,
                     swag=True,
                     start=autostart,
                 )
@@ -148,7 +151,7 @@ class MenuHelper:
         return index
 
     def choose_character(
-        character, gamestate, port, controller, swag=False, start=False
+        character, gamestate, port, controller, costume=2, swag=False, start=False
     ):
         """Choose a character from the character select menu
 
@@ -156,6 +159,7 @@ class MenuHelper:
             character (enums.Character): The character you want to pick
             gamestate (gamestate.GameState): The current gamestate
             controller (controller.Controller): The controller object to press buttons on
+            costume (int): The costume index to choose
             swag (bool): Pick random until you get the character
             start (bool): Automatically start the match when it's ready
 
@@ -245,7 +249,13 @@ class MenuHelper:
             return
 
         if character_selected == character and swag and isSlippiCSS:
-            controller.press_button(enums.Button.BUTTON_START)
+            if costume == ai_state.costume:
+                controller.press_button(enums.Button.BUTTON_START)
+            else:
+                if gamestate.frame % 2 == 0:
+                    controller.release_all()
+                else:
+                    controller.press_button(enums.Button.BUTTON_Y)
             return
 
         # We want to get to a state where the cursor is NOT over the character,
