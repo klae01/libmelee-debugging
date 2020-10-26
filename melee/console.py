@@ -16,6 +16,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
+from packaging import version
 
 from melee import enums, stages
 from melee.gamestate import Action, GameState, PlayerState, Projectile
@@ -89,6 +90,7 @@ class Console:
         self.slp_version = "unknown"
         """(str): The SLP version this stream/file currently is."""
         self._allow_old_version = allow_old_version
+        self._use_manual_bookends = False
         self._costumes = {0: 0, 1: 0, 2: 0, 3: 0}
 
         # Keep a running copy of the last gamestate produced
@@ -308,7 +310,12 @@ class Console:
                             base64.b64decode(message["payload"]), self._temp_gamestate
                         )
                         frame_ended = True
-                elif message["type"] == "frame_end" and self._frame != -10000:
+
+                elif (
+                    self._use_manual_bookends
+                    and message["type"] == "frame_end"
+                    and self._frame != -10000
+                ):
                     frame_ended = True
             else:
                 return None
@@ -390,8 +397,11 @@ class Console:
         self._frame = -10000
         major = np.ndarray((1,), ">B", event_bytes, 0x1)[0]
         minor = np.ndarray((1,), ">B", event_bytes, 0x2)[0]
-        version = np.ndarray((1,), ">B", event_bytes, 0x3)[0]
-        self.slp_version = str(major) + "." + str(minor) + "." + str(version)
+        version_num = np.ndarray((1,), ">B", event_bytes, 0x3)[0]
+        self.slp_version = str(major) + "." + str(minor) + "." + str(version_num)
+        self._use_manual_bookends = self._allow_old_version and (
+            version.parse(self.slp_version) < version.parse("3.0.0")
+        )
         if major < 3 and not self._allow_old_version:
             raise SlippiVersionTooLow(self.slp_version)
         try:
@@ -461,7 +471,7 @@ class Console:
         playerstate.controller_state.button[enums.Button.BUTTON_D_UP] = bool(
             int(buttonbits) & 0x0008
         )
-        if self._allow_old_version:
+        if self._use_manual_bookends:
             self._frame = gamestate.frame
 
     def __post_frame(self, gamestate, event_bytes):
@@ -645,7 +655,7 @@ class Console:
         except TypeError:
             ecb_right_y = 0
         playerstate.ecb_right = (ecb_right_x, ecb_right_y)
-        if self._allow_old_version:
+        if self._use_manual_bookends:
             self._frame = gamestate.frame
 
     def __frame_bookend(self, gamestate, event_bytes):

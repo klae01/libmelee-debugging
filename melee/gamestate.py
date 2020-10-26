@@ -26,7 +26,7 @@ class GameState(object):
     )
 
     def __init__(self):
-        self.frame = -9999
+        self.frame = -10000
         """int: The current frame number. Monotonically increases. Can be negative."""
         self.stage = enums.Stage.FINAL_DESTINATION
         """enums.Stage: The current stage being played on"""
