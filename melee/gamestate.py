@@ -94,6 +94,7 @@ class PlayerState(object):
         "_next_y",
         "_prev_x",
         "_prev_y",
+        "is_cpu",
     )
 
     def __init__(self):
@@ -170,6 +171,8 @@ class PlayerState(object):
         """(float, float): Bottom edge of the ECB. (x, y) offset from player's center."""
         self.costume = 0
         """(int): Index for which costume the player is wearing"""
+        self.is_cpu = False
+        """(bool): Is the player an in-game CPU? (As in, level 1-9 CPU. Not a libmelee-controller bot.)"""
         # self.hitbox_1_size = 0
         # self.hitbox_2_size = 0
         # self.hitbox_3_size = 0
