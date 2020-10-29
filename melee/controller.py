@@ -5,8 +5,6 @@ import platform
 import sys
 import time
 
-import serial
-
 try:
     import pywintypes
     import win32file
