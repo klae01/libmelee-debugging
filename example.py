@@ -162,7 +162,6 @@ while True:
         melee.MenuHelper.menu_helper_simple(
             gamestate,
             controller,
-            args.port,
             melee.Character.FOX,
             melee.Stage.YOSHIS_STORY,
             args.connect_code,
