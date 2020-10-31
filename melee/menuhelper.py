@@ -233,7 +233,7 @@ class MenuHelper:
         wiggleroom = 1.5
 
         # Set our CPU level correctly
-        if character_selected == character:
+        if character_selected == character and (coin_down or cursor_y < 0):
             # Is our controller type correct?
             cpu_selected = (
                 ai_state.controller_status == enums.ControllerStatus.CONTROLLER_CPU
@@ -269,10 +269,10 @@ class MenuHelper:
             # Select the right CPU level on the slider
             if ai_state.is_holding_cpu_slider:
                 if ai_state.cpu_level > cpu_level:
-                    controller.tilt_analog(enums.Button.BUTTON_MAIN, 0, 0.5)
+                    controller.tilt_analog(enums.Button.BUTTON_MAIN, 0.35, 0.5)
                     return
                 if ai_state.cpu_level < cpu_level:
-                    controller.tilt_analog(enums.Button.BUTTON_MAIN, 1, 0.5)
+                    controller.tilt_analog(enums.Button.BUTTON_MAIN, 0.65, 0.5)
                     return
                 if ai_state.cpu_level == cpu_level:
                     if gamestate.frame % 2 == 0:
@@ -306,6 +306,7 @@ class MenuHelper:
                 else:
                     controller.release_all()
                 return
+            return
 
         # We are already set, so let's taunt our opponent
         if character_selected == character and swag and not start:
