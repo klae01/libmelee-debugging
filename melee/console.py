@@ -151,7 +151,7 @@ class Console:
                 return True
         return False
 
-    def run(self, iso_path=None, dolphin_config_path=None):
+    def run(self, iso_path=None, dolphin_config_path=None, environment_vars=None):
         """Run the Dolphin emulator.
 
         This starts the Dolphin process, so don't run this if you're connecting to an
@@ -161,6 +161,7 @@ class Console:
             iso_path (str, optional): Path to Melee ISO for dolphin to read
             dolphin_config_path (str, optional): Alternative config path for dolphin
                 if not using the default
+            environment_vars (dict, optional): Dict (string->string) of environment variables to set
         """
         if self.is_dolphin and self.path:
             exe_name = "dolphin-emu"
@@ -179,7 +180,11 @@ class Console:
             if dolphin_config_path is not None:
                 command.append("-u")
                 command.append(dolphin_config_path)
-            self._process = subprocess.Popen(command)
+            env = os.environ.copy()
+            if environment_vars is not None:
+                for var, value in environment_vars.items():
+                    env[var] = value
+            self._process = subprocess.Popen(command, env=env)
 
     def stop(self):
         """Stop the console.
