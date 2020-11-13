@@ -10,7 +10,10 @@ import csv
 import math
 import os
 import platform
+import shutil
+import stat
 import subprocess
+import tempfile
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -38,6 +41,19 @@ class InvalidDolphinPath(Exception):
         self.message = message
 
 
+def ignore_fifos(src, names):
+    fifos = []
+    for name in names:
+        path = os.path.join(src, name)
+        if stat.S_ISFIFO(os.stat(path).st_mode):
+            fifos.append(name)
+    return fifos
+
+
+def copytree_safe(src, dst):
+    shutil.copytree(src, dst, ignore=ignore_fifos)
+
+
 # pylint: disable=too-many-instance-attributes
 class Console:
     """The console object that represents your Dolphin / Wii / SLP file"""
@@ -46,6 +62,8 @@ class Console:
         self,
         path=None,
         is_dolphin=True,
+        dolphin_home_path=None,
+        copy_home_directory=False,
         slippi_address="127.0.0.1",
         slippi_port=51441,
         online_delay=2,
@@ -59,6 +77,9 @@ class Console:
         Args:
             path (str): Path to the directory where your dolphin executable is located.
                 If None, will assume the dolphin is remote and won't try to configure it.
+            dolphin_home_path (str): Path to dolphin user directory. Optional.
+            copy_home_directory (bool): Use a copy of the usual home directory.
+            download_gecko_codes (bool): Download libmelee gecko codes.
             slippi_address (str): IP address of the Dolphin / Wii to connect to.
             slippi_port (int): UDP port that slippi will listen on
             online_delay (int): How many frames of delay to apply in online matches
@@ -75,6 +96,12 @@ class Console:
         self.logger = logger
         self.is_dolphin = is_dolphin
         self.path = path
+        self.dolphin_home_path = dolphin_home_path
+        if copy_home_directory:
+            temp_dir = tempfile.mkdtemp(prefix="libmelee_")
+            copytree_safe(self._get_dolphin_home_path(), temp_dir + "/User")
+            self.dolphin_home_path = temp_dir
+
         self.processingtime = 0
         self._frametimestamp = time.time()
         self.slippi_address = slippi_address
@@ -106,13 +133,13 @@ class Console:
         self._process = None
         if self.is_dolphin:
             self._slippstream = SlippstreamClient(self.slippi_address, self.slippi_port)
-            if self.path is not None:
+            if self.path:
                 # Setup some dolphin config options
-                dolphin_config_path = self._get_dolphin_config_path() + "Dolphin.ini"
-                if not os.path.isfile(dolphin_config_path):
+                dolphin_ini_path = self._get_dolphin_config_path() + "Dolphin.ini"
+                if not os.path.isfile(dolphin_ini_path):
                     raise InvalidDolphinPath(self._get_dolphin_config_path())
                 config = configparser.SafeConfigParser()
-                config.read(dolphin_config_path)
+                config.read(dolphin_ini_path)
                 config.set("Core", "slippienablespectator", "True")
                 config.set("Core", "slippispectatorlocalport", str(self.slippi_port))
                 # Set online delay
@@ -120,7 +147,7 @@ class Console:
                 # Turn on background input so we don't need to have window focus on dolphin
                 config.set("Input", "backgroundinput", "True")
                 config.set("Core", "BlockingPipes", str(blocking_input))
-                with open(dolphin_config_path, "w") as dolphinfile:
+                with open(dolphin_ini_path, "w") as dolphinfile:
                     config.write(dolphinfile)
         else:
             self._slippstream = SLPFileStreamer(self.path)
@@ -155,7 +182,37 @@ class Console:
         """
         return self._slippstream.connect()
 
-    def run(self, iso_path=None, dolphin_config_path=None, environment_vars=None):
+    def _get_dolphin_home_path(self):
+        """Return the path to dolphin's home directory"""
+        if self.dolphin_home_path:
+            return self.dolphin_home_path
+
+        # Next check if the home path is in the same dir as the exe
+        assert self.path, "Must specify a dolphin path."
+        user_path = self.path + "/User/"
+        if os.path.isdir(user_path):
+            return user_path
+
+        # Otherwise, this must be an appimage install. Use the .config
+        if platform.system() == "Linux":
+            return str(Path.home()) + "/.config/SlippiOnline/"
+
+        raise FileNotFoundError("Could not find dolphin home directory.")
+
+    def _get_dolphin_config_path(self):
+        """Return the path to dolphin's config directory."""
+        return self._get_dolphin_home_path() + "Config/"
+
+    def get_dolphin_pipes_path(self, port):
+        """Get the path of the named pipe input file for the given controller port"""
+        if platform.system() == "Windows":
+            return "\\\\.\\pipe\\slippibot" + str(port)
+        pipes_path = self._get_dolphin_home_path() + "/Pipes/"
+        if not os.path.isdir(pipes_path):
+            os.makedirs(pipes_path, exist_ok=True)
+        return pipes_path + f"slippibot{port}"
+
+    def run(self, iso_path=None, dolphin_user_path=None, environment_vars=None):
         """Run the Dolphin emulator.
 
         This starts the Dolphin process, so don't run this if you're connecting to an
@@ -163,32 +220,36 @@ class Console:
 
         Args:
             iso_path (str, optional): Path to Melee ISO for dolphin to read
-            dolphin_config_path (str, optional): Alternative config path for dolphin
+            dolphin_user_path (str, optional): Alternative config path for dolphin
                 if not using the default
             environment_vars (dict, optional): Dict (string->string) of environment variables to set
         """
-        if self.is_dolphin and self.path:
-            exe_name = "dolphin-emu"
-            if platform.system() == "Windows":
-                exe_name = "Dolphin.exe"
+        assert self.is_dolphin and self.path
 
-            exe_path = ""
-            if self.path:
-                exe_path = self.path
-            command = [exe_path + "/" + exe_name]
-            if platform.system() == "Linux" and os.path.isfile(self.path):
-                command = [self.path]
-            if iso_path is not None:
-                command.append("-e")
-                command.append(iso_path)
-            if dolphin_config_path is not None:
-                command.append("-u")
-                command.append(dolphin_config_path)
-            env = os.environ.copy()
-            if environment_vars is not None:
-                for var, value in environment_vars.items():
-                    env[var] = value
-            self._process = subprocess.Popen(command, env=env)
+        dolphin_user_path = dolphin_user_path or self._get_dolphin_home_path()
+
+        exe_name = "dolphin-emu"
+        if platform.system() == "Windows":
+            exe_name = "Dolphin.exe"
+
+        exe_path = ""
+        if self.path:
+            exe_path = self.path
+        command = [exe_path + "/" + exe_name]
+
+        # AppImage
+        if platform.system() == "Linux" and os.path.isfile(self.path):
+            command = [self.path]
+
+        if iso_path is not None:
+            command.append("-e")
+            command.append(iso_path)
+        command.append("-u")
+        command.append(dolphin_user_path)
+        env = os.environ.copy()
+        if environment_vars is not None:
+            env.update(environment_vars)
+        self._process = subprocess.Popen(command, env=env)
 
     def stop(self):
         """Stop the console.
@@ -917,43 +978,6 @@ class Console:
                 != enums.ControllerStatus.CONTROLLER_CPU
             ):
                 gamestate.player[port].cpu_level = 0
-
-    def _get_dolphin_home_path(self):
-        """Return the path to dolphin's home directory"""
-        if self.path:
-            return self.path + "/User/"
-        return ""
-
-    def _get_dolphin_config_path(self):
-        """Return the path to dolphin's config directory
-        (which is not necessarily the same as the home path)"""
-        if self.path:
-            if platform.system() == "Linux":
-                # First check if the config path is here in the same directory
-                if os.path.isdir(self.path + "/User/Config/"):
-                    return self.path + "/User/Config/"
-                # Otherwise, this must be an appimage install. Use the .config
-                return str(Path.home()) + "/.config/SlippiOnline/Config/"
-            else:
-                return self.path + "/User/Config/"
-        return ""
-
-    def get_dolphin_pipes_path(self, port):
-        """Get the path of the named pipe input file for the given controller port"""
-        if platform.system() == "Windows":
-            return "\\\\.\\pipe\\slippibot" + str(port)
-        if platform.system() == "Linux":
-            # First check if the config path is here in the same directory
-            if os.path.isdir(self.path + "/User/"):
-                if not os.path.isdir(self.path + "/User/Pipes/"):
-                    os.mkdir(self.path + "/User/Pipes/")
-                return self.path + "/User/Pipes/slippibot" + str(port)
-            if not os.path.isdir(str(Path.home()) + "/.config/SlippiOnline/Pipes/"):
-                os.mkdir(str(Path.home()) + "/.config/SlippiOnline/Pipes/")
-            return (
-                str(Path.home()) + "/.config/SlippiOnline/Pipes/slippibot" + str(port)
-            )
-        return self._get_dolphin_home_path() + "/Pipes/slippibot" + str(port)
 
     def __fixframeindexing(self, gamestate):
         """Melee's indexing of action frames is wildly inconsistent.
