@@ -501,6 +501,11 @@ class Console:
             gamestate.player[controller_port] = PlayerState()
         playerstate = gamestate.player[controller_port]
 
+        # Is this Nana?
+        if np.ndarray((1,), ">B", event_bytes, 0x6)[0] == 1:
+            playerstate.nana = PlayerState()
+            playerstate = playerstate.nana
+
         playerstate.costume = self._costumes[controller_port - 1]
         playerstate.cpu_level = self._cpu_level[controller_port - 1]
 
@@ -559,8 +564,13 @@ class Console:
 
         if controller_port not in gamestate.player:
             gamestate.player[controller_port] = PlayerState()
-
         playerstate = gamestate.player[controller_port]
+
+        # Is this Nana?
+        if np.ndarray((1,), ">B", event_bytes, 0x6)[0] == 1:
+            playerstate.nana = PlayerState()
+            playerstate = playerstate.nana
+
         playerstate.x = np.ndarray((1,), ">f", event_bytes, 0xA)[0]
         playerstate.y = np.ndarray((1,), ">f", event_bytes, 0xE)[0]
 

@@ -45,7 +45,7 @@ class GameState(object):
         self.ready_to_start = False
         """(bool): Is the 'ready to start' banner showing at the character select screen?"""
         self.distance = 0.0
-        """(float): Euclidian distance between the two players. (or closest one for climbers)"""
+        """(float): Euclidian distance between the two players. (or just Popo for climbers)"""
         self.menu_selection = 0
         """(int): The index of the selected menu item for when in menus."""
         self._newframe = True
@@ -96,6 +96,7 @@ class PlayerState(object):
         "_prev_y",
         "cpu_level",
         "is_holding_cpu_slider",
+        "nana",
     )
 
     def __init__(self):
@@ -147,6 +148,11 @@ class PlayerState(object):
         """(float): Attack-induced vertical speed"""
         self.speed_ground_x_self = 0
         """(float): Self-induced horizontal ground speed"""
+        self.nana = None
+        """(enums.PlayerState): Additional player state for Nana, if applicable.
+                If the character is not Ice Climbers, Nana will be None.
+                Will also be None if this player state is Nana itself.
+                Lastly, the secondary climber is called 'Nana' here, regardless of the costume used."""
         self.cursor_x = 0
         """(float): Cursor X value"""
         self.cursor_y = 0
