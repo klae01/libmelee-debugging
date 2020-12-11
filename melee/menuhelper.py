@@ -18,7 +18,7 @@ class MenuHelper:
         controller,
         character_selected,
         stage_selected,
-        connect_code,
+        connect_code="",
         cpu_level=0,
         costume=0,
         autostart=False,
