@@ -88,12 +88,7 @@ class PlayerState(object):
         "ecb_top",
         "ecb_left",
         "ecb_right",
-        "prev_action",
         "costume",
-        "_next_x",
-        "_next_y",
-        "_prev_x",
-        "_prev_y",
         "cpu_level",
         "is_holding_cpu_slider",
         "nana",
@@ -182,29 +177,6 @@ class PlayerState(object):
         """(bool): CPU level of player. 0 for a libmelee-controller bot or human player."""
         self.is_holding_cpu_slider = False
         """(bool): Is the player holding the CPU slider in the character select screen?"""
-        # self.hitbox_1_size = 0
-        # self.hitbox_2_size = 0
-        # self.hitbox_3_size = 0
-        # self.hitbox_4_size = 0
-        # self.hitbox_1_status = False
-        # self.hitbox_2_status = False
-        # self.hitbox_3_status = False
-        # self.hitbox_4_status = False
-        # self.hitbox_1_x = 0
-        # self.hitbox_1_y = 0
-        # self.hitbox_2_x = 0
-        # self.hitbox_2_y = 0
-        # self.hitbox_3_x = 0
-        # self.hitbox_3_y = 0
-        # self.hitbox_4_x = 0
-        # self.hitbox_4_y = 0
-        self.prev_action = Action.UNKNOWN_ANIMATION
-
-        # For internal use only, ignore these
-        self._next_x = 0
-        self._next_y = 0
-        self._prev_x = 0
-        self._prev_y = 0
 
 
 class Projectile:
