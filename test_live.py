@@ -50,7 +50,7 @@ class DolphinTest(unittest.TestCase):
                     gamestate.frame > 30
                 ):
                     self.assertEqual(
-                        gamestate.players[1].character_selected, melee.Character.FOX
+                        gamestate.players[1].character, melee.Character.FOX
                     )
                     break
         console.stop()
