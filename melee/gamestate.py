@@ -16,6 +16,7 @@ class GameState(object):
         "menu_state",
         "submenu",
         "player",
+        "players",
         "projectiles",
         "stage_select_cursor_x",
         "stage_select_cursor_y",
@@ -34,8 +35,11 @@ class GameState(object):
         """enums.MenuState: The current menu scene, such as IN_GAME, or STAGE_SELECT"""
         self.submenu = enums.SubMenu.UNKNOWN_SUBMENU
         """(enums.SubMenu): The current sub-menu"""
-        self.player = dict()
+        self.players = dict()
         """(dict of int - gamestate.PlayerState): Dict of PlayerState objects. Key is controller port"""
+        self.player = self.players
+        """(dict of int - gamestate.PlayerState): WARNING: Deprecated. Will be removed in version 1.0.0. Use `players` instead
+            Dict of PlayerState objects. Key is controller port"""
         self.projectiles = []
         """(list of Projectile): All projectiles (items) currently existing"""
         self.stage_select_cursor_x = 0.0
@@ -212,7 +216,7 @@ def port_detector(gamestate, character, costume):
         costume: Costume index we picked
     """
     detected_port = 0
-    for i, player in gamestate.player.items():
+    for i, player in gamestate.players.items():
         if player.character == character and player.costume == costume:
             if detected_port > 0:
                 return 0
