@@ -621,13 +621,6 @@ class Console:
         playerstate.stock = np.ndarray((1,), ">B", event_bytes, 0x21)[0]
         playerstate.action_frame = int(np.ndarray((1,), ">f", event_bytes, 0x22)[0])
 
-        # Extract the bit at mask 0x20
-        try:
-            bitflags2 = np.ndarray((1,), ">B", event_bytes, 0x27)[0]
-            playerstate.hitlag = bool(bitflags2 & 0x20)
-        except TypeError:
-            playerstate.hitlag = False
-
         try:
             playerstate.hitstun_frames_left = int(
                 np.ndarray((1,), ">f", event_bytes, 0x2B)[0]
@@ -680,6 +673,11 @@ class Console:
             ]
         except TypeError:
             playerstate.speed_ground_x_self = 0
+
+        try:
+            playerstate.hitlag_left = int(np.ndarray((1,), ">f", event_bytes, 0x49)[0])
+        except TypeError:
+            playerstate.hitlag_left = 0
 
         # Keep track of a player's invulnerability due to respawn or ledge grab
         if controller_port in self._prev_gamestate.players:

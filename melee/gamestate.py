@@ -73,7 +73,7 @@ class PlayerState(object):
         "action_frame",
         "invulnerable",
         "invulnerability_left",
-        "hitlag",
+        "hitlag_left",
         "hitstun_frames_left",
         "jumps_left",
         "on_ground",
@@ -135,8 +135,8 @@ class PlayerState(object):
         """(bool): Is the player invulnerable?"""
         self.invulnerability_left = 0
         """(int): How many frames of invulnerability are left."""
-        self.hitlag = False
-        """(bool): Is the player currently in hitlag?"""
+        self.hitlag_left = 0
+        """(bool): Is the player currently in hitstun?"""
         self.hitstun_frames_left = 0
         """(int): How many more frames of hitstun there is"""
         self.jumps_left = 0
