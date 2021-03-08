@@ -112,3 +112,7 @@ class Logger:
         """Write the log to file"""
         self.writer.writeheader()
         self.writer.writerows(self.rows)
+
+    def skipframe(self):
+        """Skip this frame in the log"""
+        self.current_row = dict()
