@@ -26,6 +26,7 @@ class GameState(object):
         "distance",
         "menu_selection",
         "_newframe",
+        "custom",
     )
 
     def __init__(self):
@@ -55,6 +56,8 @@ class GameState(object):
         self.menu_selection = 0
         """(int): The index of the selected menu item for when in menus."""
         self._newframe = True
+        self.custom = dict()
+        """(dict): Custom fields to be added by the user"""
 
 
 class PlayerState(object):
