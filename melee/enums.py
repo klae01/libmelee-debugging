@@ -685,7 +685,7 @@ class Action(Enum):
     UNKNOWN_ANIMATION = 0xFFFF
 
 
-class ProjectileSubtype(Enum):
+class ProjectileType(Enum):
     """Primary type of prejectile or item"""
 
     BOB_OMB = 0x06  # Bob-omb (BombHei)
