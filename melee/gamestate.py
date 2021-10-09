@@ -26,6 +26,9 @@ class GameState(object):
         "distance",
         "menu_selection",
         "_newframe",
+        "playedOn",
+        "startAt",
+        "consoleNick",
         "custom",
     )
 
@@ -55,6 +58,12 @@ class GameState(object):
         """(float): Euclidian distance between the two players. (or just Popo for climbers)"""
         self.menu_selection = 0
         """(int): The index of the selected menu item for when in menus."""
+        self.startAt = ""
+        """(string): Timestamp string of when the game started. Such as '2018-06-22T07:52:59Z'"""
+        self.playedOn = ""
+        """(string): Platform the game was played on (values include dolphin, console, and network). Might be blank."""
+        self.consoleNick = ""
+        """(string): The name of the console the replay was created on. Might be blank."""
         self._newframe = True
         self.custom = dict()
         """(dict): Custom fields to be added by the user"""
@@ -104,6 +113,8 @@ class PlayerState(object):
         "position",
         "cursor",
         "ecb",
+        "nickName",
+        "connectCode",
     )
 
     def __init__(self):
@@ -193,6 +204,10 @@ class PlayerState(object):
         """(bool): CPU level of player. 0 for a libmelee-controller bot or human player."""
         self.is_holding_cpu_slider = False
         """(bool): Is the player holding the CPU slider in the character select screen?"""
+        self.nickName = ""
+        """(string): The in-game nickname for the player. Might be blank."""
+        self.connectCode = ""
+        """(string): The rollback connect code for the player. Might be blank."""
 
 
 class Projectile:
