@@ -115,6 +115,7 @@ class PlayerState(object):
         "ecb",
         "nickName",
         "connectCode",
+        "team_id",
     )
 
     def __init__(self):
@@ -208,6 +209,8 @@ class PlayerState(object):
         """(string): The in-game nickname for the player. Might be blank."""
         self.connectCode = ""
         """(string): The rollback connect code for the player. Might be blank."""
+        self.team_id = 0
+        """(int): The team ID of the player. This is different than costume, and only relevant during teams."""
 
 
 class Projectile:
