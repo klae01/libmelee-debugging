@@ -116,6 +116,7 @@ class PlayerState(object):
         "nickName",
         "connectCode",
         "team_id",
+        "is_powershield",
     )
 
     def __init__(self):
@@ -138,6 +139,8 @@ class PlayerState(object):
         """(int): The player's damage"""
         self.shield_strength = 60.0
         """(float): The player's shield strength (max 60). Shield breaks at 0"""
+        self.is_powershield = False
+        """(bool): Is the current action a Powershield? (not directly determinable via action states)"""
         self.stock = 0
         """(int): The player's remaining stock count"""
         self.facing = True
