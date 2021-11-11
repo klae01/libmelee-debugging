@@ -29,6 +29,7 @@ class GameState(object):
         "playedOn",
         "startAt",
         "consoleNick",
+        "is_teams",
         "custom",
     )
 
@@ -54,6 +55,8 @@ class GameState(object):
         """(float): DEPRECATED. Use `players[X].cursor` instead. Will be removed in 1.0.0. Stage select cursor's Y coordinate. Ranges from -19 to 19"""
         self.ready_to_start = False
         """(bool): Is the 'ready to start' banner showing at the character select screen?"""
+        self.is_teams = False
+        """(bool): Is this a teams game?"""
         self.distance = 0.0
         """(float): Euclidian distance between the two players. (or just Popo for climbers)"""
         self.menu_selection = 0
