@@ -5,7 +5,6 @@ is your method to start and stop Dolphin, set configs, and get the latest GameSt
 """
 
 import base64
-import collections
 import configparser
 import csv
 import math
@@ -23,8 +22,9 @@ import numpy as np
 from packaging import version
 
 from melee import enums, stages
-from melee.gamestate import Action, GameState, PlayerState, Projectile
-from melee.slippstream import CommType, EventType, SlippstreamClient
+from melee.enums import Action
+from melee.gamestate import GameState, PlayerState, Projectile
+from melee.slippstream import EventType, SlippstreamClient
 from melee.slpfilestreamer import SLPFileStreamer
 
 
@@ -770,7 +770,6 @@ class Console:
             ecb_top_y = np.ndarray((1,), ">f", event_bytes, 0x51)[0]
         except TypeError:
             ecb_top_y = 0
-        playerstate.ecb.top = collections.namedtuple("Position", ["x", "y"])
         playerstate.ecb.top.x = ecb_top_x
         playerstate.ecb.top.y = ecb_top_y
         playerstate.ecb_top = (ecb_top_x, ecb_top_y)
@@ -787,7 +786,6 @@ class Console:
             ecb_bot_y = np.ndarray((1,), ">f", event_bytes, 0x59)[0]
         except TypeError:
             ecb_bot_y = 0
-        playerstate.ecb.bottom = collections.namedtuple("Position", ["x", "y"])
         playerstate.ecb.bottom.x = ecb_bot_x
         playerstate.ecb.bottom.y = ecb_bot_y
         playerstate.ecb_bottom = (ecb_bot_x, ecb_bot_y)
@@ -804,7 +802,6 @@ class Console:
             ecb_left_y = np.ndarray((1,), ">f", event_bytes, 0x61)[0]
         except TypeError:
             ecb_left_y = 0
-        playerstate.ecb.left = collections.namedtuple("Position", ["x", "y"])
         playerstate.ecb.left.x = ecb_left_x
         playerstate.ecb.left.y = ecb_left_y
         playerstate.ecb_left = (ecb_left_x, ecb_left_y)
@@ -821,7 +818,6 @@ class Console:
             ecb_right_y = np.ndarray((1,), ">f", event_bytes, 0x69)[0]
         except TypeError:
             ecb_right_y = 0
-        playerstate.ecb.right = collections.namedtuple("Position", ["x", "y"])
         playerstate.ecb.right.x = ecb_right_x
         playerstate.ecb.right.y = ecb_right_y
         playerstate.ecb_right = (ecb_right_x, ecb_right_y)
