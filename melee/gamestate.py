@@ -12,6 +12,8 @@ from melee import enums
 
 @dataclass
 class Position:
+    """Dataclass for position types. Has (x, y) coords."""
+
     x: np.float32 = np.float32(0)
     y: np.float32 = np.float32(0)
 
@@ -22,6 +24,8 @@ Cursor = Position
 
 @dataclass
 class ECB:
+    """ECBs (Environmental collision box) info. It's a diamond with four points that define it."""
+
     top: Position = field(default_factory=Position)
     bottom: Position = field(default_factory=Position)
     left: Position = field(default_factory=Position)
@@ -152,7 +156,7 @@ class PlayerState(object):
         #   Don't use this value when in-game
         self.character_selected = enums.Character.UNKNOWN_CHARACTER
         self.position = Position()
-        """(namedtuple: float, float): x, y character position"""
+        """(Position): x, y character position"""
         self.x = 0
         """(float): DEPRECATED. Use `position` instead. Will be removed in 1.0.0. The character's X position"""
         self.y = 0
@@ -199,7 +203,7 @@ class PlayerState(object):
                 Will also be None if this player state is Nana itself.
                 Lastly, the secondary climber is called 'Nana' here, regardless of the costume used."""
         self.cursor = Cursor()
-        """(namedtuple: float, float): x, y cursor position"""
+        """(Position): x, y cursor position"""
         self.cursor_x = 0
         """(float): DEPRECATED. Use `cursor` instead. Will be removed in 1.0.0. Cursor X value"""
         self.cursor_y = 0
@@ -243,13 +247,13 @@ class Projectile:
 
     def __init__(self):
         self.position = Position()
-        """(namedtuple: float, float): x, y projectile position"""
+        """(Position): x, y projectile position"""
         self.x = 0
         """(float): DEPRECATED. Use `position` instead. Will be removed in 1.0.0. Projectile's X position"""
         self.y = 0
         """(float): DEPRECATED. Use `position` instead. Will be removed in 1.0.0. Projectile's Y position"""
         self.speed = Speed()
-        """(namedtuple: float, float): x, y projectile speed"""
+        """(Position): x, y projectile speed"""
         self.x_speed = 0
         """(float): DEPRECATED. Use `speed` instead. Will be removed in 1.0.0. Projectile's horizontal speed"""
         self.y_speed = 0
