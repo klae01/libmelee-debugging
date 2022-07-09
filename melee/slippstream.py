@@ -6,6 +6,7 @@ This can be used to talk to some server implementing the Slippstream protocol
 """
 
 import json
+import logging
 import multiprocessing as mp
 from audioop import add
 from enum import Enum
@@ -75,7 +76,8 @@ class SlippstreamWorker:
             self._peer = self._host.connect(
                 enet.Address(bytes(self.address, "utf-8"), self.port), 1
             )
-        except OSError:
+        except OSError as e:
+            logging.error(e)
             return False
         try:
             for _ in range(4):
@@ -83,8 +85,10 @@ class SlippstreamWorker:
                 if event.type == enet.EVENT_TYPE_CONNECT:
                     self._send_handshake()
                     return True
+            logging.error("Could not receive CONNECT event.")
             return False
         except OSError:
+            logging.error(e)
             return False
 
     def run(self):
