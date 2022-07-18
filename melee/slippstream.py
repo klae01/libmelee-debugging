@@ -116,7 +116,7 @@ class SlippstreamClient:
                 self.buf += self.server.recv(1000)
                 # Exclude the the message length in the header
                 # msg = ubjson.loadb(self.buf[4:])
-                payload = self.buf[4:]
+                payload = self.buf[:]
                 # Clear out the old buffer
                 del self.buf
                 self.buf = bytearray()
