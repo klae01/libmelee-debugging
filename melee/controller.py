@@ -61,11 +61,11 @@ class ControllerState:
         if self.button[enums.Button.BUTTON_Y]:
             buttons_total += 0x0800
         if self.button[enums.Button.BUTTON_Z]:
-            buttons_total += 0x1000
+            buttons_total += 0x0010
         if self.button[enums.Button.BUTTON_L]:
-            buttons_total += 0x0002
+            buttons_total += 0x0040
         if self.button[enums.Button.BUTTON_R]:
-            buttons_total += 0x0004
+            buttons_total += 0x0020
 
         buffer = pack(">H", buttons_total)
 
@@ -111,7 +111,7 @@ class Controller:
         console,
         port,
         type=enums.ControllerType.STANDARD,
-        serial_device="/dev/ttyACM1",
+        serial_device="/dev/ttyACM0",
     ):
         """Create a new virtual controller
 
