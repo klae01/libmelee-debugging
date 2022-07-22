@@ -8,7 +8,7 @@ import melee
 log = melee.Logger()
 
 console = melee.Console(
-    path=None, is_dolphin=False, copy_home_directory=False, logger=log
+    path=None, system="gamecube", copy_home_directory=False, logger=log
 )
 
 controller = melee.Controller(
