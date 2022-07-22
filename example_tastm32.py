@@ -4,6 +4,7 @@ import signal
 import sys
 
 import melee
+import melee.serial_helper
 
 log = melee.Logger()
 
@@ -11,8 +12,14 @@ console = melee.Console(
     path=None, system="gamecube", copy_home_directory=False, logger=log
 )
 
+tastm32port = melee.serial_helper.get_tastm32_serial_port()
+print("Found TAStm32 at: " + tastm32port)
+
 controller = melee.Controller(
-    console=console, port=1, type=melee.ControllerType.STANDARD
+    console=console,
+    port=1,
+    serial_device=tastm32port,
+    type=melee.ControllerType.STANDARD,
 )
 
 # This isn't necessary, but makes it so that Dolphin will get killed when you ^C
