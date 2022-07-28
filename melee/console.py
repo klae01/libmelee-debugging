@@ -1005,7 +1005,6 @@ class Console:
             gamestate.players[2] = PlayerState()
             gamestate.players[3] = PlayerState()
             gamestate.players[4] = PlayerState()
-
         elif scene == 0x0202:
             gamestate.menu_state = enums.Menu.IN_GAME
         elif scene == 0x0001:
@@ -1018,6 +1017,8 @@ class Console:
             gamestate.players[4] = PlayerState()
         elif scene == 0x0000:
             gamestate.menu_state = enums.Menu.PRESS_START
+        elif scene == 0x0402:
+            gamestate.menu_state = enums.Menu.POSTGAME_SCORES
         else:
             gamestate.menu_state = enums.Menu.UNKNOWN_MENU
 
