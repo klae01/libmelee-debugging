@@ -66,7 +66,7 @@ class MenuHelper:
                 )
         # If we're at the postgame scores screen, spam START
         elif gamestate.menu_state == enums.Menu.POSTGAME_SCORES:
-            MenuHelper.skip_postgame(controller=controller)
+            MenuHelper.skip_postgame(controller=controller, gamestate=gamestate)
         # Skip the press start screen
         elif gamestate.menu_state == enums.Menu.PRESS_START:
             MenuHelper.choose_versus_mode(gamestate=gamestate, controller=controller)
@@ -505,13 +505,12 @@ class MenuHelper:
         # If we get in the right area, press A
         controller.press_button(enums.Button.BUTTON_A)
 
-    def skip_postgame(controller):
+    def skip_postgame(controller, gamestate):
         """Spam the start button"""
-        # Alternate pressing start and letting go
-        if controller.prev.button[enums.Button.BUTTON_START] == False:
+        if gamestate.frame % 60 == 0:
             controller.press_button(enums.Button.BUTTON_START)
         else:
-            controller.release_button(enums.Button.BUTTON_START)
+            controller.release_all()
 
     def change_controller_status(
         controller, gamestate, targetport, status, character=None
