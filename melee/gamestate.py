@@ -53,6 +53,8 @@ class GameState(object):
         "startAt",
         "consoleNick",
         "is_teams",
+        "_fod_platform_left",
+        "_fod_platform_right",
         "custom",
     )
 
@@ -91,6 +93,8 @@ class GameState(object):
         self.consoleNick = ""
         """(string): The name of the console the replay was created on. Might be blank."""
         self._newframe = True
+        self._fod_platform_left, self._fod_platform_right = 0, 0
+        """(float): The current height of FoD platforms"""
         self.custom = dict()
         """(dict): Custom fields to be added by the user"""
 
