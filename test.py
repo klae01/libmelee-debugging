@@ -15,7 +15,7 @@ class SLPFile(unittest.TestCase):
         Load and parse SLP file
         """
         console = melee.Console(
-            is_dolphin=False,
+            system="file",
             allow_old_version=False,
             path="test_artifacts/test_game_1.slp",
         )
@@ -42,9 +42,7 @@ class SLPFile(unittest.TestCase):
         Load and parse old SLP file
         """
         console = melee.Console(
-            is_dolphin=False,
-            allow_old_version=True,
-            path="test_artifacts/test_game_2.slp",
+            system="file", allow_old_version=True, path="test_artifacts/test_game_2.slp"
         )
         self.assertTrue(console.connect())
         framecount = 0
