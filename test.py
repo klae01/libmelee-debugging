@@ -72,6 +72,29 @@ class SLPFile(unittest.TestCase):
             framedata.is_attack(melee.Character.FALCO, melee.Action.STANDING)
         )
 
+    def test_corrupt_file(self):
+        """Load a corrupt SLP file and make sure we don't crash"""
+        console = melee.Console(
+            system="file",
+            allow_old_version=True,
+            path="test_artifacts/corrupt_game_1.slp",
+        )
+        self.assertFalse(console.connect())
+
+        console = melee.Console(
+            system="file",
+            allow_old_version=True,
+            path="test_artifacts/corrupt_game_2.slp",
+        )
+        self.assertFalse(console.connect())
+
+        console = melee.Console(
+            system="file",
+            allow_old_version=True,
+            path="test_artifacts/corrupt_game_3.slp",
+        )
+        self.assertFalse(console.connect())
+
 
 if __name__ == "__main__":
     unittest.main()

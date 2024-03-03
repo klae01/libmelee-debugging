@@ -94,7 +94,16 @@ class SLPFileStreamer:
 
     def connect(self):
         with open(self._path, mode="rb") as file:
-            full = ubjson.loadb(file.read())
+            full = None
+            try:
+                full = ubjson.loadb(file.read())
+            except ubjson.decoder.DecoderException:
+                return False
+            # This is annoying and sometimes happens when there's an error parsing
+            if not isinstance(full, dict):
+                return False
+            if "raw" not in full:
+                return False
             raw = full["raw"]
             self._contents = raw
             try:
