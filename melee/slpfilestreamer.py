@@ -35,6 +35,7 @@ class SLPFileStreamer:
         self.timestamp = ""
         self.consoleNick = ""
         self.players = {}
+        self.lastFrame = -9999
 
     def shutdown(self):
         pass
@@ -110,6 +111,10 @@ class SLPFileStreamer:
                 pass
             try:
                 self.players = full["metadata"]["players"]
+            except KeyError:
+                pass
+            try:
+                self.lastFrame = full["metadata"]["lastFrame"]
             except KeyError:
                 pass
             return True
