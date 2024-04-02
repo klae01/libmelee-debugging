@@ -120,7 +120,10 @@ class SlippstreamWorker:
 
 
 def _run_worker(**kwargs):
-    SlippstreamWorker(**kwargs).run()
+    try:
+        SlippstreamWorker(**kwargs).run()
+    except KeyboardInterrupt:
+        pass  # don't spam the console with stack traces
 
 
 class EnetDisconnected(Exception):
