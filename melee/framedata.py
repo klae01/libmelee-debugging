@@ -631,12 +631,12 @@ class FrameData:
             return -1
         return max(frames)
 
-    def roll_end_position(self, character_state, stage):
+    def roll_end_position(self, character_state, gamestate):
         """Returns the x coordinate that the current roll will end in
 
         Args:
             character_state (gamestate.PlayerState): The player we're calculating for
-            stage (enums.Stage): The stage being played on
+            gamestate (gamestate.Gamestate): The current gamestate
         """
         distance = 0
         try:
@@ -675,14 +675,20 @@ class FrameData:
             ]:
                 # Adjust the position to account for the fact that we can't roll off the platform
                 side_platform_height, side_platform_left, side_platform_right = (
-                    stages.side_platform_position(character_state.position.x > 0, stage)
+                    stages.side_platform_position(
+                        character_state.position.x > 0, gamestate
+                    )
                 )
                 top_platform_height, top_platform_left, top_platform_right = (
-                    stages.top_platform_position(stage)
+                    stages.top_platform_position(gamestate)
                 )
                 if character_state.position.y < 5:
-                    position = min(position, stages.EDGE_GROUND_POSITION[stage])
-                    position = max(position, -stages.EDGE_GROUND_POSITION[stage])
+                    position = min(
+                        position, stages.EDGE_GROUND_POSITION[gamestate.stage]
+                    )
+                    position = max(
+                        position, -stages.EDGE_GROUND_POSITION[gamestate.stage]
+                    )
                 elif (side_platform_height is not None) and abs(
                     character_state.position.y - side_platform_height
                 ) < 5:
@@ -1135,7 +1141,7 @@ class FrameData:
             A, B, C
         ) != FrameData._ccw(A, B, D)
 
-    def project_hit_location(self, character_state, stage, frames=-1):
+    def project_hit_location(self, character_state, gamestate, frames=-1):
         """How far does the given character fly, assuming they've been hit?
             Only considers air-movement, not ground sliding.
             Projection ends if hitstun ends, or if a platform is encountered
@@ -1147,7 +1153,7 @@ class FrameData:
 
         Args:
             character_state (GameState.PlayerState): The character state to calculate for
-            stage (enums.Stage): The stage being played on
+            gamestate (gamestate.Gamestate): The current gamestate
             frames (int): The number of frames to calculate for. -1 means "until end of hitstun"
 
         Returns:
@@ -1165,12 +1171,16 @@ class FrameData:
         # Get list of all platforms, tuples of (height, left, right)
         platforms = []
         platforms.append(
-            (0, -stages.EDGE_GROUND_POSITION[stage], stages.EDGE_GROUND_POSITION[stage])
+            (
+                0,
+                -stages.EDGE_GROUND_POSITION[gamestate.stage],
+                stages.EDGE_GROUND_POSITION[gamestate.stage],
+            )
         )
-        left_plat = stages.left_platform_position(stage)
+        left_plat = stages.left_platform_position(gamestate)
         if left_plat[0] is not None:
             platforms.append(left_plat)
-        right_plat = stages.right_platform_position(stage)
+        right_plat = stages.right_platform_position(gamestate)
         if right_plat[0] is not None:
             platforms.append(right_plat)
 
