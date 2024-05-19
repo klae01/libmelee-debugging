@@ -65,7 +65,7 @@ class GameState(object):
         """enums.MenuState: The current menu scene, such as IN_GAME, or STAGE_SELECT"""
         self.submenu = enums.SubMenu.UNKNOWN_SUBMENU
         """(enums.SubMenu): The current sub-menu"""
-        self.players = dict()
+        self.players: dict[int, PlayerState] = dict()
         """(dict of int - gamestate.PlayerState): Dict of PlayerState objects. Key is controller port"""
         self.player = self.players
         """(dict of int - gamestate.PlayerState): WARNING: Deprecated. Will be removed in version 1.0.0. Use `players` instead
@@ -141,6 +141,7 @@ class PlayerState(object):
         "ecb",
         "nickName",
         "connectCode",
+        "displayName",
         "team_id",
         "is_powershield",
     )
@@ -238,6 +239,8 @@ class PlayerState(object):
         """(string): The in-game nickname for the player. Might be blank."""
         self.connectCode = ""
         """(string): The rollback connect code for the player. Might be blank."""
+        self.displayName = ""
+        """(string): The Slippi Online display name for the play. Might be blank"""
         self.team_id = 0
         """(int): The team ID of the player. This is different than costume, and only relevant during teams."""
 
